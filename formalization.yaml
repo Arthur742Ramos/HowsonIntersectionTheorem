@@ -17,8 +17,11 @@ project:
   responsible_maintainers:
     - "Arthur Freitas Ramos"
 
+repository:
+  role: "substantive-development"
+
 classification:
-  arxiv: ["math.GR", "math.AT", "math.LO"]
+  arxiv: ["math.GR"]
   msc2020: ["20E07", "20F65", "05C25"]
 
 sources:
@@ -28,18 +31,29 @@ sources:
     id: "10.4153/CJM-1949-017-2"
     type: "article"
     location: "https://doi.org/10.4153/CJM-1949-017-2"
-    relationship: "independently-proves"
-    note: "Classical source for the finite-index extension theorem whose subgroup-separability consequence is formalized here."
+    relationship: "adapts"
+    note: "Classical source for the finite-index extension theorem; this repository formalizes its subgroup-separability consequence rather than claiming the full free-factor conclusion."
+    license: "unknown"
+    author_endorsement: "not-contacted"
+  - title: "Topology of finite graphs"
+    authors:
+      - "John R. Stallings"
+    id: "10.1007/BF02095993"
+    type: "article"
+    location: "Inventiones Mathematicae 71(3), 551--565 (1983)"
+    relationship: "background"
+    note: "Original finite-graph and core-graph source for the covering perspective behind the finite-state completion used by the implementation."
     license: "unknown"
     author_endorsement: "not-contacted"
   - title: "Stallings foldings and subgroups of free groups"
     authors:
-      - "John R. Stallings"
-    id: "https://doi.org/10.1007/BF01389126"
+      - "Ilya Kapovich"
+      - "Alexei Myasnikov"
+    id: "10.1006/jabr.2001.9033"
     type: "article"
-    location: "https://doi.org/10.1007/BF01389126"
-    relationship: "informs"
-    note: "Finite-core and folded-graph perspective underlying the finite-state completion used by the implementation."
+    location: "Journal of Algebra 248(2), 608--668 (2002)"
+    relationship: "background"
+    note: "Combinatorial and computational treatment of Stallings foldings; it motivates the finite-core viewpoint, while this repository proves the stated separator by finite permutation completion."
     license: "unknown"
     author_endorsement: "not-contacted"
 
@@ -57,7 +71,7 @@ related_formalizations:
     relationship: "builds-on"
     note: "Uses `Equiv.extendSubtype` to complete each finite partial generator action to a permutation."
   - id: "https://github.com/Arthur742Ramos/GraphCoveringTheory"
-    relationship: "informed-by"
+    relationship: "other"
     note: "The preceding covering-graph and Schreier development motivated the finite-state covering formulation, but is not imported by this repository."
 
 status:
@@ -71,13 +85,19 @@ status:
     consequence of Marshall Hall's theorem. The stronger free-factor
     conclusion (that H is a free factor of K) is intentionally not claimed
     by this first submission and is the next formalization layer.
-  sorry_count: 1
+  sorry_count: 0
   sorry_in_definitions: 0
-  axioms: []
+  axioms: ["propext", "Classical.choice", "Quot.sound"]
+  main_results:
+    - declaration: "freeGroup_subgroup_separable"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
 
 automation:
   methods:
-    - method: "agent-assisted"
+    - method: "agent"
       models: ["GPT-5 Codex"]
       framework: "Lean 4 and Mathlib"
       tool_setup: "Pinned Lean/Mathlib builds, kernel checking, closure-safe Challenge compilation, and Comparator/NanoDa replay."
@@ -106,10 +126,12 @@ review:
     - "none"
   notes: >-
     The Challenge theorem is a small statement surface with one deliberate
-    proof hole. The Solution and implementation library contain no proof holes
-    or custom axioms. The finite suffix-state construction, permutation
-    completion, basepoint stabilizer, finite-index argument, containment of H,
-    and exclusion of g are checked by Lean's kernel.
+    proof hole excluded from the status counts. The Solution and implementation
+    library contain no proof holes or nonstandard axioms. The finite
+    suffix-state construction, permutation completion, basepoint stabilizer,
+    finite-index argument, containment of H, and exclusion of g are checked by
+    Lean's kernel; the pinned Comparator replay checks the Challenge/Solution
+    correspondence independently.
 
 alignment:
   namespace: ""
@@ -130,4 +152,4 @@ alignment:
       status: "proved"
       note: "The finite-core word evaluator agrees with Mathlib's reduced free-group word representation."
 
-acknowledgements: "Mathlib contributors for the free-group, quotient, finite-type, permutation, and group-action infrastructure; John R. Stallings for the finite-core graph perspective; Marshall Hall, Jr. for the classical theorem; and the Palomar Registry project for the statement/solution Comparator workflow."
+acknowledgements: "Mathlib contributors for the free-group, quotient, finite-type, permutation, and group-action infrastructure; John R. Stallings, Ilya Kapovich, and Alexei Myasnikov for the finite-core and folding perspectives; Marshall Hall, Jr. for the classical theorem; and the Palomar Registry project for the statement/solution Comparator workflow."

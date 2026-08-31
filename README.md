@@ -34,6 +34,12 @@ tree of the completed cover. This repository records that boundary explicitly
 instead of presenting the weaker separation theorem as the full free-factor
 statement.
 
+## References
+
+- M. Hall, Jr., [Subgroups of finite index in free groups](https://doi.org/10.4153/CJM-1949-017-2), *Canadian Journal of Mathematics* 1 (1949), 187--190.
+- J. R. Stallings, [Topology of finite graphs](https://doi.org/10.1007/BF02095993), *Inventiones Mathematicae* 71(3) (1983), 551--565.
+- I. Kapovich and A. Myasnikov, [Stallings foldings and subgroups of free groups](https://doi.org/10.1006/jabr.2001.9033), *Journal of Algebra* 248(2) (2002), 608--668.
+
 ## Repository map
 
 - `Challenge.lean` is the closure-safe Palomar statement surface.
