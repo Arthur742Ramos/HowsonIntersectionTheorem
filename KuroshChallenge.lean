@@ -71,17 +71,49 @@ abbrev Product {ι : Type v} (G : ι → Type u)
     {J : Type (max u v)} (A : J → Subgroup H) (X : Type (max u v)) :=
   Monoid.CoprodI (Component G H A X)
 
+/-! The canonical maps from the displayed factors into `H`.  The non-free
+components use the subtype inclusion, while the free component is supplied
+by the decomposition witness. -/
+
+def ComponentHom {ι : Type v} (G : ι → Type u)
+    [∀ i, Group (G i)] (H : Subgroup (FreeProduct G))
+    {J : Type (max u v)} (A : J → Subgroup H) (X : Type (max u v))
+    (freePartMap : ULift.{max (u + 1) (v + 1)} (FreeGroup X) →* H) :
+    ∀ q : J ⊕ PUnit.{1}, Component G H A X q →* H
+  | Sum.inl j => by
+      change ULift.{max (u + 1) (v + 1)} (A j) →* H
+      exact
+        { toFun := fun x => x.down.1
+          map_one' := by simp
+          map_mul' := by intro x y; simp }
+  | Sum.inr _ => freePartMap
+
+/-! The homomorphism induced by the actual factor inclusions.  Thus an
+isomorphism to `H` below is required to use the displayed subgroups as its
+factors, rather than merely having the same abstract source type. -/
+
+def inducedHom {ι : Type v} (G : ι → Type u)
+    [∀ i, Group (G i)] (H : Subgroup (FreeProduct G))
+    {J : Type (max u v)} (A : J → Subgroup H) (X : Type (max u v))
+    (freePartMap : ULift.{max (u + 1) (v + 1)} (FreeGroup X) →* H) :
+    Product G H A X →* H :=
+  Monoid.CoprodI.lift (ComponentHom G H A X freePartMap)
+
 /-! The challenge theorem exposes both the decomposition and the origin of
 each non-free factor.  In particular, the factor family is not an arbitrary
 family of groups: every factor is required to be an actual conjugate
-intersection. -/
+intersection, and the displayed decomposition equivalence is required to be
+the homomorphism induced by those inclusions (together with its free-part
+map). -/
 
 theorem kurosh_bass_serre_decomposition_challenge {ι : Type v}
     (G : ι → Type u) [∀ i, Group (G i)] (H : Subgroup (FreeProduct G)) :
     ∃ (J : Type (max u v)) (X : Type (max u v)) (A : J → Subgroup H),
       (∀ j, ∃ i : ι, ∃ g : FreeProduct G,
         A j = intersectionFactorInH G H i g) ∧
-      Nonempty (Product G H A X ≃* H) := by
+      ∃ (freePartMap : ULift.{max (u + 1) (v + 1)} (FreeGroup X) →* H),
+        ∃ (decomposition : Product G H A X ≃* H),
+          decomposition.toMonoidHom = inducedHom G H A X freePartMap := by
   sorry
 
 end GraphCoveringTheory.KuroshChallenge

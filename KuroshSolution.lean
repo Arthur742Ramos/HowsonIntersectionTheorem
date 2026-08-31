@@ -63,6 +63,30 @@ abbrev Product {ι : Type v} (G : ι → Type u)
     {J : Type (max u v)} (A : J → Subgroup H) (X : Type (max u v)) :=
   Monoid.CoprodI (Component G H A X)
 
+/-! The canonical maps from the displayed factors into `H`. -/
+
+def ComponentHom {ι : Type v} (G : ι → Type u)
+    [∀ i, Group (G i)] (H : Subgroup (FreeProduct G))
+    {J : Type (max u v)} (A : J → Subgroup H) (X : Type (max u v))
+    (freePartMap : ULift.{max (u + 1) (v + 1)} (FreeGroup X) →* H) :
+    ∀ q : J ⊕ PUnit.{1}, Component G H A X q →* H
+  | Sum.inl j => by
+      change ULift.{max (u + 1) (v + 1)} (A j) →* H
+      exact
+        { toFun := fun x => x.down.1
+          map_one' := by simp
+          map_mul' := by intro x y; simp }
+  | Sum.inr _ => freePartMap
+
+/-! The homomorphism induced by the actual factor inclusions. -/
+
+def inducedHom {ι : Type v} (G : ι → Type u)
+    [∀ i, Group (G i)] (H : Subgroup (FreeProduct G))
+    {J : Type (max u v)} (A : J → Subgroup H) (X : Type (max u v))
+    (freePartMap : ULift.{max (u + 1) (v + 1)} (FreeGroup X) →* H) :
+    Product G H A X →* H :=
+  Monoid.CoprodI.lift (ComponentHom G H A X freePartMap)
+
 /-! The checked proof of the Kurosh Palomar statement. -/
 
 theorem kurosh_bass_serre_decomposition_challenge {ι : Type v}
@@ -70,7 +94,9 @@ theorem kurosh_bass_serre_decomposition_challenge {ι : Type v}
     ∃ (J : Type (max u v)) (X : Type (max u v)) (A : J → Subgroup H),
       (∀ j, ∃ i : ι, ∃ g : FreeProduct G,
         A j = intersectionFactorInH G H i g) ∧
-      Nonempty (Product G H A X ≃* H) := by
+      ∃ (freePartMap : ULift.{max (u + 1) (v + 1)} (FreeGroup X) →* H),
+        ∃ (decomposition : Product G H A X ≃* H),
+          decomposition.toMonoidHom = inducedHom G H A X freePartMap := by
   let J := GraphCoveringTheory.Kurosh.KuroshActiveVertexIndex G H
   let X := IsFreeGroup.Generators (GraphCoveringTheory.Kurosh.KuroshFreePart G H)
   let A : J → Subgroup H := fun j =>
@@ -161,7 +187,67 @@ theorem kurosh_bass_serre_decomposition_challenge {ι : Type v}
             GraphCoveringTheory.Kurosh.KuroshActiveProduct G H => f z) hbackward
       map_mul' := forward.map_mul }
 
-  rcases GraphCoveringTheory.Kurosh.kurosh_decomposition G H with ⟨activeEquiv⟩
-  exact ⟨J, X, A, hfactor, ⟨productEquiv.trans activeEquiv⟩⟩
+  let activeEquiv := GraphCoveringTheory.Kurosh.kuroshActiveEquivH G H
+  let freePartMap :
+      ULift.{max (u + 1) (v + 1)} (FreeGroup X) →* H :=
+    activeEquiv.toMonoidHom.comp
+      ((Monoid.CoprodI.of :
+        GraphCoveringTheory.Kurosh.KuroshActiveComponent G H
+            (Sum.inr PUnit.unit) →*
+          GraphCoveringTheory.Kurosh.KuroshActiveProduct G H).comp
+        (componentEquiv (Sum.inr PUnit.unit)).toMonoidHom)
+  let decomposition : Product G H A X ≃* H :=
+    productEquiv.trans activeEquiv
+
+  have hdecomposition :
+      decomposition.toMonoidHom = inducedHom G H A X freePartMap := by
+    apply Monoid.CoprodI.ext_hom
+    intro q
+    apply MonoidHom.ext
+    intro x
+    cases q with
+    | inl j =>
+        change activeEquiv
+            ((Monoid.CoprodI.of :
+              @GraphCoveringTheory.Kurosh.KuroshActiveComponent.{u, v, 0} ι G _ H
+                  (Sum.inl j) →*
+                GraphCoveringTheory.Kurosh.KuroshActiveProduct G H)
+              ((componentEquiv (Sum.inl j)) x)) = x.down.1
+        change activeEquiv
+            (Monoid.CoprodI.of
+              (show @GraphCoveringTheory.Kurosh.KuroshActiveComponent.{u, v, 0}
+                  ι G _ H
+                  (Sum.inl j) from ULift.up x.down)) = x.down.1
+        change GraphCoveringTheory.Kurosh.test_treeKuroshProductMulEquivH G H
+            (GraphCoveringTheory.Kurosh.activeProductToTree G H
+              (Monoid.CoprodI.of
+                (show @GraphCoveringTheory.Kurosh.KuroshActiveComponent.{u, v, 0}
+                    ι G _ H
+                    (Sum.inl j) from ULift.up x.down))) = x.down.1
+        change GraphCoveringTheory.Kurosh.test_treeKuroshProductMulEquivH G H
+            ((Monoid.CoprodI.lift
+              (GraphCoveringTheory.Kurosh.activeComponentToTree G H))
+              (Monoid.CoprodI.of
+                (show @GraphCoveringTheory.Kurosh.KuroshActiveComponent.{u, v, 0}
+                    ι G _ H
+                    (Sum.inl j) from ULift.up x.down))) = x.down.1
+        rw [Monoid.CoprodI.lift_of]
+        change GraphCoveringTheory.Kurosh.test_treeKuroshProductMulEquivH G H
+            (Monoid.CoprodI.of
+              (show @GraphCoveringTheory.Kurosh.TreeKuroshComponent.{u, v, 0}
+                  ι G _ H
+                  (Sum.inl j.1) from ULift.up x.down)) = x.down.1
+        exact @GraphCoveringTheory.Kurosh.treeKuroshProductToH_vertex.{u, v, 0}
+          ι G _ H j.1 x.down
+    | inr q =>
+        change activeEquiv
+            ((Monoid.CoprodI.of :
+              @GraphCoveringTheory.Kurosh.KuroshActiveComponent.{u, v, 0} ι G _ H
+                  (Sum.inr q) →*
+                GraphCoveringTheory.Kurosh.KuroshActiveProduct G H)
+              ((componentEquiv (Sum.inr q)) x)) = freePartMap x
+        rfl
+
+  exact ⟨J, X, A, hfactor, freePartMap, decomposition, hdecomposition⟩
 
 end GraphCoveringTheory.KuroshChallenge
