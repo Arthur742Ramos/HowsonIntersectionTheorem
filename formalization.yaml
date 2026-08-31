@@ -2,92 +2,75 @@
 version: "v0.4"
 
 project:
-  name: "Schreier and Kurosh subgroup theorems via covering graphs"
+  name: "Finite-core separation for free groups"
   description: >-
-    Formalizes the sharp Schreier index formula for finite-index subgroups of
-    free groups and the Kurosh subgroup theorem for arbitrary subgroups of
-    indexed free products. The Schreier proof realizes a subgroup as the
-    vertex group of a finite action-groupoid covering, while the Kurosh proof
-    constructs the Bass--Serre tree, a locally bijective graph-of-groups cover,
-    and its path-lifting normal form. The Kurosh factor-only statement is a
-    free product of the nontrivial quotient vertex stabilizers and the free
-    group of the quotient graph; each vertex stabilizer is identified with an
-    intersection with a conjugate of an original factor. For finite-index
-    normal subgroups, a companion module proves that every deck transformation
-    of the finite Schreier action is a unique right translation by the
-    quotient group.
+    Formalizes the subgroup-separability (LERF) consequence of Marshall
+    Hall's theorem for finitely generated subgroups of finitely generated
+    free groups. The proof extracts the finitely many suffix states of a
+    subgroup generating set and a separating word, completes the resulting
+    partial generator actions to permutations of a finite state set, and
+    takes the stabilizer of the base state. This is the finite-state form of
+    the Stallings core-completion argument.
   authors:
     - "Arthur Freitas Ramos"
-    - "David Barros Hulak"
-    - "Ruy J. G. B. de Queiroz"
   license: "Apache-2.0"
   responsible_maintainers:
     - "Arthur Freitas Ramos"
 
 classification:
   arxiv: ["math.GR", "math.AT", "math.LO"]
-  msc2020: ["20E07", "05C25", "18B40"]
+  msc2020: ["20E07", "20F65", "05C25"]
 
 sources:
-  - title: "Die Untergruppen der freien Produkte von beliebigen Gruppen"
+  - title: "Subgroups of Finite Index in Free Groups"
     authors:
-      - "A. G. Kurosh"
-    id: "EUDML:159700"
+      - "Marshall Hall, Jr."
+    id: "10.4153/CJM-1949-017-2"
     type: "article"
-    location: "https://eudml.org/doc/159700"
+    location: "https://doi.org/10.4153/CJM-1949-017-2"
     relationship: "independently-proves"
-    note: "The classical source for the subgroup theorem for free products formalized in the Bass--Serre development."
+    note: "Classical source for the finite-index extension theorem whose subgroup-separability consequence is formalized here."
     license: "unknown"
     author_endorsement: "not-contacted"
-  - title: "Die Untergruppen der freien Gruppen"
+  - title: "Stallings foldings and subgroups of free groups"
     authors:
-      - "Otto Schreier"
-    id: "10.1007/BF02952517"
+      - "John R. Stallings"
+    id: "https://doi.org/10.1007/BF01389126"
     type: "article"
-    location: "https://eudml.org/doc/168236"
-    relationship: "independently-proves"
-    note: "The classical source for the finite-index rank formula formalized here."
+    location: "https://doi.org/10.1007/BF01389126"
+    relationship: "informs"
+    note: "Finite-core and folded-graph perspective underlying the finite-state completion used by the implementation."
     license: "unknown"
     author_endorsement: "not-contacted"
 
 related_formalizations:
   - id: "https://github.com/leanprover-community/mathlib4/blob/v4.32.0/Mathlib/GroupTheory/FreeGroup/NielsenSchreier.lean"
     relationship: "builds-on"
-    note: "Uses Mathlib's free-group, free-groupoid, and action-groupoid infrastructure; this repository adds the sharp finite-index formula and its covering-graph proof rather than re-formalizing that library API."
-  - id: "https://github.com/leanprover-community/mathlib4/blob/v4.32.0/Mathlib/GroupTheory/Schreier.lean"
+    note: "Uses Mathlib's free-group representation and Nielsen--Schreier infrastructure; the finite-core separation construction is developed in this repository."
+  - id: "https://github.com/leanprover-community/mathlib4/blob/v4.32.0/Mathlib/GroupTheory/FreeGroup/Reduce.lean"
     relationship: "builds-on"
-    note: "Builds on the existing Schreier finite-generation and rank-bound API, then proves the sharp equality for finite-index subgroups of free groups."
-  - id: "https://github.com/leanprover-community/mathlib4/blob/v4.32.0/Mathlib/Combinatorics/Quiver/Covering.lean"
+    note: "Uses the canonical reduced-word encoding and normalization lemmas to enumerate suffix states of finite words."
+  - id: "https://github.com/leanprover-community/mathlib4/blob/v4.32.0/Mathlib/GroupTheory/Coset/Basic.lean"
     relationship: "builds-on"
-    note: "Uses Mathlib's quiver-covering structures and star/costar equivalences to package the finite Schreier graph; the covering construction and subgroup result are developed here."
-  - id: "https://github.com/leanprover-community/mathlib4/blob/v4.32.0/Mathlib/Combinatorics/Quiver/Arborescence.lean"
+    note: "Uses the left-coset quotient and its exact relation to subgroup membership."
+  - id: "https://github.com/leanprover-community/mathlib4/blob/v4.32.0/Mathlib/Logic/Equiv/Fintype.lean"
     relationship: "builds-on"
-    note: "Uses the geodesic arborescence API to obtain the certified spanning tree whose complementary edges are counted in the Schreier proof."
-  - id: "https://github.com/leanprover-community/mathlib4/blob/v4.32.0/Mathlib/CategoryTheory/Action/Concrete.lean"
-    relationship: "builds-on"
-    note: "Uses Mathlib's concrete action and quotient-action infrastructure in the proof identifying the regular finite Schreier deck group with the quotient group."
-  - id: "https://github.com/Arthur742Ramos/finite-graph-fundamental-group"
-    relationship: "builds-on"
-    note: "Reuses the earlier kernel-checked finite-graph spanning-tree basis API and extends it with the covering-graph, Schreier, and Bass--Serre/Kurosh developments in this repository."
+    note: "Uses `Equiv.extendSubtype` to complete each finite partial generator action to a permutation."
+  - id: "https://github.com/Arthur742Ramos/GraphCoveringTheory"
+    relationship: "informed-by"
+    note: "The preceding covering-graph and Schreier development motivated the finite-state covering formulation, but is not imported by this repository."
 
 status:
   scope: >-
-    The Schreier theorem covers every finite nonempty generating type alpha and
-    every subgroup H of FreeGroup alpha carrying Mathlib's finite-index
-    typeclass. It proves an explicit group equivalence with FreeGroup (Fin (1 +
-    H.index * (Fintype.card alpha - 1))) and, internally, a FreeGroupBasis
-    indexed by that type. The Kurosh theorem covers every subgroup H of an
-    arbitrary indexed free product. Its factor-only product is indexed by the
-    nontrivial vertex stabilizers of the quotient Bass--Serre graph together
-    with the quotient graph's free group, and each such stabilizer is proved
-    equal to `H ∩ g G_i g⁻¹` for some i and g. The direct graph-of-groups form
-    also retains the trivial central stabilizers. In the regular finite case,
-    `GraphCoveringTheory.finiteIndexQuotientDeckGroupEquiv` proves that the
-    deck transformations of the finite Schreier action are exactly the
-    quotient group acting by right translations. The repository does not
-    claim the full classification of all pointed covers, the general
-    normalizer formula for arbitrary subgroups, or a topological cover
-    classification.
+    The headline theorem covers every finite generating type alpha, every
+    finitely generated subgroup H of FreeGroup alpha, and every element g not
+    in H. It produces a subgroup K containing H with nonzero natural-number
+    index and excluding g. The implementation proves this by a finite
+    permutation action built from all suffix states of finite generators and
+    the separating word. This is precisely the subgroup-separability/LERF
+    consequence of Marshall Hall's theorem. The stronger free-factor
+    conclusion (that H is a free factor of K) is intentionally not claimed
+    by this first submission and is the next formalization layer.
   sorry_count: 1
   sorry_in_definitions: 0
   axioms: []
@@ -102,91 +85,49 @@ automation:
         wall_time: "not tracked"
         spend_usd: "subscription-based"
         hardware: "local machine"
-      prompting_notes: "The proof was developed against the pinned Lean and Mathlib APIs and checked by the Lean kernel."
+      prompting_notes: "The theorem was developed against the pinned Lean and Mathlib APIs and checked by the Lean kernel."
   spend_usd: "subscription-based"
-  notes: "The public statement is isolated from candidate-local implementation modules; the solution imports the reusable covering and spanning-tree development."
+  notes: "The public statement is isolated from the finite-core implementation module."
 
 fidelity:
   divergences: >-
-    The formalization states group equivalence rather than only equality of
-    abstract ranks, and uses finite free groups indexed by Fin. The positive
-    hypothesis is explicit because natural-number subtraction is truncated;
-    the implementation also proves the equivalent all-n truncation-safe form.
-    The finite covering is the action groupoid on the right coset quotient
-    supplied by Mathlib, with a rose as base. This is the finite Schreier graph
-    construction, not a claim to have formalized the entire topological
-    subgroup-cover correspondence. The Kurosh statement uses the canonical
-    quotient-vertex stabilizer index rather than choosing a separate
-    double-coset representative for every factor; its accompanying factor
-    theorem proves the equivalent intersection description without making
-    those choices part of the public product type.
+    The public theorem states the subgroup-separability consequence rather than
+    the stronger free-factor conclusion of the full Marshall Hall theorem.
+    The formal index condition is `K.index ≠ 0`, matching Mathlib's convention
+    that an infinite-index subgroup has index zero. The finite cover is encoded
+    as a finite permutation action on a set of left-coset states; each partial
+    generator action is completed by an equivalence extension. The proof does
+    not claim a full topological classification of covers or a separately
+    formalized Stallings folding algorithm.
 
 review:
   status: "self-assessed"
   reviewers:
     - "none"
   notes: >-
-    The Challenge theorem is a small, closure-safe statement surface with one
-    deliberate proof hole, while Solution and the implementation library are
-    proof-hole-free. The Schreier covering maps, free-groupoid generators,
-    vertex count, edge count, subgroup identification, and final reindexing
-    equivalence are checked by Lean's kernel. The Kurosh development adds a
-    checked Bass--Serre tree, local cover bijections, path lifting, trivial
-    factor removal, and a kernel proof for the graph-of-groups normal form. No
-    custom axioms are introduced.
+    The Challenge theorem is a small statement surface with one deliberate
+    proof hole. The Solution and implementation library contain no proof holes
+    or custom axioms. The finite suffix-state construction, permutation
+    completion, basepoint stabilizer, finite-index argument, containment of H,
+    and exclusion of g are checked by Lean's kernel.
 
 alignment:
-  namespace: "GraphCoveringTheory"
+  namespace: ""
   statements:
-    - source: "Kurosh, Die Untergruppen der freien Produkte von beliebigen Gruppen"
-      lean: "GraphCoveringTheory.Kurosh.kurosh_decomposition"
-      module: "GraphCoveringTheory/KuroshTheorem.lean"
-      status: "proved"
-      note: "Every subgroup of an indexed free product is equivalent to the free product of its nontrivial quotient Bass--Serre vertex stabilizers and the quotient graph's free group."
-    - source: "Kurosh, Die Untergruppen der freien Produkte von beliebigen Gruppen"
-      lean: "GraphCoveringTheory.Kurosh.kurosh_factor_is_conjugate_intersection"
-      module: "GraphCoveringTheory/KuroshTheorem.lean"
-      status: "proved"
-      note: "Each nontrivial quotient vertex stabilizer is identified with an intersection of the subgroup and a conjugate of an original free factor."
-    - source: "Schreier, Die Untergruppen der freien Gruppen"
-      lean: "GraphCoveringTheory.schreier_index_formula"
+    - source: "Marshall Hall, Subgroups of Finite Index in Free Groups"
+      lean: "freeGroup_subgroup_separable"
       module: "Solution.lean"
       status: "proved"
-      note: "For every finite nonempty generating type alpha, a finite-index subgroup of FreeGroup alpha is free of rank 1 + index * (Fintype.card alpha - 1)."
-    - source: "Schreier, Die Untergruppen der freien Gruppen"
-      lean: "GraphCoveringTheory.schreier_basis_fintype_proved"
-      module: "GraphCoveringTheory/IndexFormula.lean"
+      note: "For a finitely generated subgroup H and g outside H, a finite-index subgroup K contains H and excludes g."
+    - source: "Stallings finite-core method"
+      lean: "MarshallHall.freeGroup_subgroup_separable_proved"
+      module: "MarshallHall/Separation.lean"
       status: "proved"
-      note: "The covering proof exposes a FreeGroupBasis for the subgroup, indexed by the non-tree edges of the finite Schreier graph after finite reindexing."
-    - source: "Mathlib Combinatorics.Quiver.Covering"
-      lean: "GraphCoveringTheory.coverProjection_isCovering"
-      module: "GraphCoveringTheory/SchreierCover.lean"
+      note: "The implementation enumerates suffix states, completes partial label actions, and uses the resulting basepoint stabilizer."
+    - source: "Mathlib GroupTheory FreeGroup Reduce"
+      lean: "MarshallHall.wordValue_eq_freeGroup_mk"
+      module: "MarshallHall/FiniteCore.lean"
       status: "proved"
-      note: "The explicit Schreier graph projection has bijective star and costar maps."
-    - source: "Mathlib CategoryTheory.Groupoid.FreeGroupoid"
-      lean: "GraphCoveringTheory.freeGroupoid_end_free_rank"
-      module: "GraphCoveringTheory/IndexFormula.lean"
-      status: "proved"
-      note: "A finite connected free groupoid endomorphism group is computed from the complement of a geodesic spanning tree."
-    - source: "Mathlib CategoryTheory.Groupoid.FreeGroupoid"
-      lean: "GraphCoveringTheory.freeGroupoid_end_free_basis"
-      module: "GraphCoveringTheory/IndexFormula.lean"
-      status: "proved"
-      note: "The same spanning-tree argument returns the actual FreeGroupBasis before its rank equivalence is extracted."
-    - source: "Mathlib GroupTheory.FreeGroup.NielsenSchreier"
-      lean: "GraphCoveringTheory.freeActionGroupoidIsFree"
-      module: "GraphCoveringTheory/SchreierCover.lean"
-      status: "proved"
-      note: "The action groupoid is given an explicit generator quiver indexed by the original free-group generators."
-    - source: "Finite graph fundamental groups: combinatorial and geometric models"
-      lean: "FiniteGraphFreeGroup.spanningTreeBasis"
-      module: "FiniteGraphFreeGroup/Proof.lean"
-      status: "adapts"
-      note: "The prior finite-graph basis API is reused for the new finite covering graph."
-    - source: "Mathlib CategoryTheory.Action.Concrete"
-      lean: "GraphCoveringTheory.finiteIndexQuotientDeckGroupEquiv"
-      module: "GraphCoveringTheory/Deck.lean"
-      status: "proved"
-      note: "For a finite-index normal subgroup, right translations identify the quotient group with all automorphisms of the finite Schreier action."
+      note: "The finite-core word evaluator agrees with Mathlib's reduced free-group word representation."
 
-acknowledgements: "Mathlib contributors for the free-group, free-groupoid, quiver-covering, arborescence, quotient, and finite-type infrastructure; the Palomar Registry project for the statement/solution Comparator workflow; A. G. Kurosh and Otto Schreier for the classical subgroup theorems; and the contributors to the preceding finite-graph formalization."
+acknowledgements: "Mathlib contributors for the free-group, quotient, finite-type, permutation, and group-action infrastructure; John R. Stallings for the finite-core graph perspective; Marshall Hall, Jr. for the classical theorem; and the Palomar Registry project for the statement/solution Comparator workflow."

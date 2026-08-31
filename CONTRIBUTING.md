@@ -1,21 +1,18 @@
 # Contributing
 
 Keep the advertised theorem in `Challenge.lean` small and independently
-auditable. The Schreier proof lives in `FiniteGraphFreeGroup/Proof.lean` and
-is exposed from `Solution.lean`; the Bass--Serre/Kurosh proof is split across
-the `GraphCoveringTheory/Kurosh*.lean` support modules and is exposed from
-`GraphCoveringTheory/KuroshTheorem.lean`. The Kurosh Palomar surface is
-`KuroshChallenge.lean`/`KuroshSolution.lean` with `comparator-kurosh.json`.
+auditable. The finite suffix-state construction lives in
+`MarshallHall/FiniteCore.lean` and `MarshallHall/Separation.lean`; it is
+exposed from `Solution.lean`.
 
 Before opening a pull request, run:
 
 ```text
 lake build
-cd docbuild && lake build GraphCoveringTheory:docs
+cd docbuild && lake build MarshallHall:docs
 cd ..
 ruby scripts/validate-formalization.rb
 ./scripts/verify-comparator.sh
-./scripts/verify-comparator.sh comparator-kurosh.json
 ```
 
 Do not add custom axioms or replace completed proofs with `sorry`. Keep the

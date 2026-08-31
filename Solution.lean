@@ -1,24 +1,20 @@
-import GraphCoveringTheory
-
-open FreeGroup
+import MarshallHall.Separation
 
 noncomputable section
 
-universe u
-
-namespace GraphCoveringTheory
-
 /-!
-# Proved solution
+# Checked solution
 
-The comparator-facing theorem is kept as a tiny statement surface.  The proof
-is supplied by the finite Schreier covering construction in
-`GraphCoveringTheory.IndexFormula`.
+The public theorem is a short LERF statement.  Its proof is supplied by the
+finite-core completion construction in `MarshallHall.Separation`.
 -/
 
-theorem schreier_index_formula (α : Type u) [Fintype α] [Nonempty α]
-    (H : Subgroup (FreeGroup α)) [H.FiniteIndex] :
-    Nonempty (H ≃* FreeGroup (Fin (1 + H.index * (Fintype.card α - 1)))) := by
-  exact schreier_index_formula_fintype_proved α H
-
-end GraphCoveringTheory
+theorem freeGroup_subgroup_separable
+    {α : Type*} [Finite α]
+    (H : Subgroup (FreeGroup α))
+    [Group.FG H]
+    (g : FreeGroup α)
+    (hg : g ∉ H) :
+    ∃ K : Subgroup (FreeGroup α),
+      H ≤ K ∧ K.index ≠ 0 ∧ g ∉ K := by
+  exact MarshallHall.freeGroup_subgroup_separable_proved H g hg

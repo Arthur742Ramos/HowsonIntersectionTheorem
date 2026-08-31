@@ -3,7 +3,7 @@
  "packages":
  [{"type": "path",
    "scope": "",
-   "name": "GraphCoveringTheory",
+   "name": "MarshallHallTheorem",
    "manifestFile": "lake-manifest.json",
    "inherited": false,
    "dir": "../",

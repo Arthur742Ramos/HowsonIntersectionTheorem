@@ -1,24 +1,22 @@
 import Mathlib.GroupTheory.FreeGroup.NielsenSchreier
-
-open FreeGroup
+import Mathlib.GroupTheory.Finiteness
 
 noncomputable section
 
-universe u
-
-namespace GraphCoveringTheory
-
 /-!
-# Schreier's index formula
+# Subgroup separability of finitely generated free groups
 
-The challenge asks for the sharp rank formula for a finite-index subgroup of a
-free group on any finite nonempty generating type.  The statement is therefore
-independent of a chosen enumeration of the generators.
+The challenge is the LERF form of Marshall Hall's theorem.  The theorem is
+deliberately stated using only Mathlib's free-group and finite-generation
+interfaces; the finite-core and completion argument belongs in the solution.
 -/
 
-theorem schreier_index_formula (α : Type u) [Fintype α] [Nonempty α]
-    (H : Subgroup (FreeGroup α)) [H.FiniteIndex] :
-    Nonempty (H ≃* FreeGroup (Fin (1 + H.index * (Fintype.card α - 1)))) := by
+theorem freeGroup_subgroup_separable
+    {α : Type*} [Finite α]
+    (H : Subgroup (FreeGroup α))
+    [Group.FG H]
+    (g : FreeGroup α)
+    (hg : g ∉ H) :
+    ∃ K : Subgroup (FreeGroup α),
+      H ≤ K ∧ K.index ≠ 0 ∧ g ∉ K := by
   sorry
-
-end GraphCoveringTheory
