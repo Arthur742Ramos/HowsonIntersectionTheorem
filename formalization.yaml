@@ -10,8 +10,10 @@ project:
     resulting partial generator actions to permutations of a finite state
     set, identifies the connected orbit with a finite core, and extends a
     geodesic spanning tree to obtain an inclusion-compatible free-product
-    decomposition. The repository also proves the binary free-group instance
-    of Grushko--Neumann rank additivity and the LERF consequence.
+    decomposition. The repository also proves the binary and finite-indexed
+    free-group instances of Grushko--Neumann rank additivity, together with
+    the factorwise infrastructure and exact Nielsen-reduction interface for
+    the arbitrary-factor theorem, and the LERF consequence.
   authors:
     - "Arthur Freitas Ramos"
   license: "Apache-2.0"
@@ -64,7 +66,7 @@ sources:
     type: "article"
     location: "Journal of the London Mathematical Society 18(1), 12--20 (1943)"
     relationship: "formalizes"
-    note: "Classical source for the Grushko--Neumann rank-additivity theorem; this repository formalizes the finite-rank free-group instance via an explicit free-product equivalence and an abelianization lower bound."
+    note: "Classical source for the Grushko--Neumann rank-additivity theorem; this repository formalizes the binary and finite-indexed finite-rank free-group instances via explicit free-product equivalences and records the exact Nielsen-reduction interface needed for arbitrary factors."
     license: "unknown"
     author_endorsement: "not-contacted"
 
@@ -92,9 +94,11 @@ status:
     K containing H with nonzero natural-number index, a complement, and a
     multiplicative equivalence H * complement ≃* K whose left injection is the
     actual inclusion of H. The same finite-state engine yields the LERF
-    separator for any element outside H. The rank result covers binary free
-    products of free groups on finite types; arbitrary finitely generated
-    free factors remain outside the formalized Grushko scope.
+    separator for any element outside H. The rank result covers binary and
+    finite indexed free products of free groups on finite types. The
+    arbitrary-factor rank theorem is reduced to the explicitly stated
+    Nielsen-separated-generator property, but that fold/reduction theorem
+    remains outside the current formalized scope.
   sorry_count: 0
   sorry_in_definitions: 0
   axioms: ["propext", "Classical.choice", "Quot.sound"]
@@ -105,6 +109,10 @@ status:
       axioms: ["propext", "Classical.choice", "Quot.sound"]
     - declaration: "MarshallHall.rank_binaryFreeProduct"
       file: "MarshallHall/Grushko.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+    - declaration: "MarshallHall.GeneralGrushko.rank_coprodI_freeGroup"
+      file: "MarshallHall/GrushkoGeneral.lean"
       sorry_count: 0
       axioms: ["propext", "Classical.choice", "Quot.sound"]
     - declaration: "freeGroup_subgroup_separable"
@@ -135,9 +143,10 @@ fidelity:
     Mathlib's convention that an infinite-index subgroup has index zero. The
     finite cover is encoded as a finite permutation action on a set of
     left-coset states; each partial generator action is completed by an
-    equivalence extension. The Grushko result is explicitly restricted to
-    free factors that are themselves free groups on finite types; it does not
-    claim the general arbitrary-factor theorem.
+    equivalence extension. The proved Grushko rank calculations are explicitly
+    restricted to free factors that are themselves free groups on finite
+    types. The general arbitrary-factor theorem is exposed only through its
+    proved reduction bridge and is not claimed as complete.
 
 review:
   status: "self-assessed"
@@ -170,6 +179,11 @@ alignment:
       module: "MarshallHall/Grushko.lean"
       status: "proved"
       note: "Binary rank additivity is formalized for free groups on finite types; the lower bound is certified through free abelianization."
+    - source: "B. H. Neumann, On the Number of Generators of a Free Product"
+      lean: "MarshallHall.GeneralGrushko.rank_coprodI_freeGroup"
+      module: "MarshallHall/GrushkoGeneral.lean"
+      status: "proved"
+      note: "The finite indexed free-group case is transported through the canonical indexed free-product equivalence; the arbitrary-factor lower bound is isolated as a separate Nielsen-reduction problem."
     - source: "Stallings finite-core method"
       lean: "MarshallHall.freeGroup_subgroup_separable_proved"
       module: "MarshallHall/Separation.lean"

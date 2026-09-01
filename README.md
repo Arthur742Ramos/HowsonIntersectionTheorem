@@ -55,9 +55,29 @@ theorem MarshallHall.rank_binaryFreeProduct
 ```
 
 This identifies the free product with the free group on the disjoint union
-of the bases and proves the lower bound through abelianization. The general
-Grushko--Neumann theorem for arbitrary finitely generated free factors is a
-separate future layer; this theorem does not claim that generality.
+of the bases and proves the lower bound through abelianization. The library
+also contains the finite indexed analogue:
+
+```lean
+theorem MarshallHall.GeneralGrushko.rank_coprodI_freeGroup
+    {ι : Type*} [Fintype ι] (α : ι → Type*)
+    [∀ i, Fintype (α i)] :
+    Group.rank (Monoid.CoprodI (fun i => FreeGroup (α i))) =
+      ∑ i, Fintype.card (α i)
+```
+
+The next genuinely new layer is the arbitrary-factor theorem. The file
+`MarshallHall/GrushkoGeneral.lean` proves the easy inequality and the lower
+bound for an already separated tuple, and packages the remaining fold/Nielsen
+step as `HasSeparatedReduction`. Once that theorem is supplied, the
+kernel-checked bridge `rank_coprod_eq_add_of_separated_reduction` yields
+
+```lean
+Group.rank (G ∗ H) = Group.rank G + Group.rank H
+```
+
+for arbitrary finitely generated groups. The repository does not claim that
+generator-reduction theorem yet.
 
 ## References
 
@@ -87,6 +107,9 @@ separate future layer; this theorem does not claim that generality.
 - `MarshallHall/Hall.lean` proves `MarshallHall.marshallHall` by combining
   the finite-state action with the finite-core spanning-tree argument.
 - `MarshallHall/Grushko.lean` proves the binary free-group rank formula.
+- `MarshallHall/GrushkoGeneral.lean` proves finite-family free-group rank,
+  the factorwise bounds for arbitrary factors, and the exact bridge from
+  separated generators to the full Grushko equality.
 - `comparator.json` records the exact Challenge/Solution correspondence.
 - `formalization.yaml` records provenance, scope, and the deliberate boundary
   between the full Hall result and the free-group Grushko instance.
