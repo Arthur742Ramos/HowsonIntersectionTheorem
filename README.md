@@ -66,18 +66,35 @@ theorem MarshallHall.GeneralGrushko.rank_coprodI_freeGroup
       ∑ i, Fintype.card (α i)
 ```
 
-The next genuinely new layer is the arbitrary-factor theorem. The file
-`MarshallHall/GrushkoGeneral.lean` proves the easy inequality and the lower
-bound for an already separated tuple, and packages the remaining fold/Nielsen
-step as `HasSeparatedReduction`. Once that theorem is supplied, the
-kernel-checked bridge `rank_coprod_eq_add_of_separated_reduction` yields
+The next layer is now complete: for arbitrary finitely generated groups, the
+finite labelled-graph reduction proves the full binary theorem:
+
+```lean
+theorem MarshallHall.rank_freeProduct_eq_add
+    {G H : Type u} [Group G] [Group H]
+    [Group.FG G] [Group.FG H] :
+    Group.rank (G ∗ H) = Group.rank G + Group.rank H
+```
+
+The proof starts from a finite subdivided rose for a generating tuple. A
+minimal null path contains a null monochromatic run. Safe folds reduce the
+vertex set directly; in the edge-reuse case, a source-unfold creates a safe
+fold, and an explicit monochromatic-vertex contraction removes the remaining
+extra vertex. Both branches preserve the marking, generation, connectivity,
+reverse-freeness, and Euler bound, so strong induction closes the separated-
+generator theorem and the rank lower bound.
+
+`MarshallHall/GrushkoGeneral.lean` contains the factorwise rank bookkeeping
+and the kernel-checked bridge
 
 ```lean
 Group.rank (G ∗ H) = Group.rank G + Group.rank H
 ```
 
-for arbitrary finitely generated groups. The repository does not claim that
-generator-reduction theorem yet.
+for arbitrary finitely generated groups, while `MarshallHall/GrushkoFull.lean`
+supplies the complete reduction. The source-unfold and marking-preserving
+contraction are split into `GrushkoUnfold.lean`, `GrushkoRemove.lean`, and
+`GrushkoUnsafe.lean` so the strict decrease is independently auditable.
 
 ## References
 
@@ -112,7 +129,7 @@ generator-reduction theorem yet.
   separated generators to the full Grushko equality.
 - `MarshallHall/GrushkoReduction.lean` supplies the checked binary normal-form
   bridge, alternating-word identity criterion, and Nielsen-minimality calculus
-  needed by the remaining global fold/reduction theorem.
+  used by the global fold/reduction theorem.
 - `MarshallHall/GrushkoFold.lean` adds the next fold-proof invariant: an
   explicit `List.splitBy` decomposition into maximal monochromatic runs, with
   a certified proof that a nonempty null-labelled word contains a null
@@ -120,8 +137,7 @@ generator-reduction theorem yet.
 - `MarshallHall/GrushkoGraph.lean` gives the graph-facing path semantics: an
   oriented-edge labelling reads composition as multiplication and reversal as
   inversion, and path-level Nielsen moves are proved to induce the actual
-  algebraic Nielsen moves on the tuple of labels.  It is the interface the
-  remaining fold construction will consume.
+  algebraic Nielsen moves on the tuple of labels.
 - `MarshallHall/GrushkoRose.lean` constructs the finite subdivided rose for a
   tuple of reduced factor words.  Its marked loops read exactly the tuple,
   the vertex type is finite, and the underlying symmetrized graph is proved
@@ -134,16 +150,20 @@ generator-reduction theorem yet.
   used in the unsafe edge-reuse case.  It constructs the duplicated edge and
   compatible reversal/labels, proves the exact vertex and oriented-edge
   cardinal changes, preserves the Euler bound, and proves that the old copy
-  is monochromatic.  The remaining step is to connect this local move to the
-  marking-preserving monochromatic-vertex removal and close the unsafe branch.
+  is monochromatic.
+- `MarshallHall/GrushkoRemove.lean` formalizes the marking-preserving
+  contraction of a monochromatic vertex, including path-read transport,
+  connectivity, reverse-freeness, and the exact Euler decrease.
+- `MarshallHall/GrushkoUnsafe.lean` connects source-unfolding, safe folding,
+  and monochromatic-vertex contraction into one certified reduction package.
 - `MarshallHall/GrushkoReductionChain.lean` packages the global strong
-  induction from safe folds to separated generators.  Its remaining
-  hypothesis is deliberately explicit: the source-unfold layer is now
-  certified, but the marking-preserving monochromatic-vertex removal still
-  needs to be connected to the induction.
+  induction interface from graph reductions to separated generators.
+- `MarshallHall/GrushkoFull.lean` reroots minimal null paths, applies the
+  complete reduction at every nonterminal stage, and proves the arbitrary-
+  factor Grushko--Neumann theorem by strong induction.
 - `comparator.json` records the exact Challenge/Solution correspondence.
-- `formalization.yaml` records provenance, scope, and the deliberate boundary
-  between the full Hall result and the free-group Grushko instance.
+- `formalization.yaml` records provenance, scope, and the relationship between
+  the Hall, LERF, and Grushko results.
 
 ## Verification
 

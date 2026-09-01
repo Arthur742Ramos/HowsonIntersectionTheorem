@@ -546,5 +546,1406 @@ theorem unfold_allArrow_reverse_ne
       simpa [unfoldEdgeReverse] using hedge
   | inr b => cases b <;> simp [unfoldEdgeReverse] at hedge
 
+/-! ### The zero-labelled switch paths -/
+
+def unfoldBaseEdge
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V)) :
+    @Quiver.Hom (UnfoldVertex (allArrowSource e₀))
+      (unfoldQuiver L e₀)
+      (unfoldOld (allArrowSource e₀))
+      (unfoldVertexAt L (allArrowSource e₀) e₀
+        (allArrowTarget e₀) (unfoldEdgeColor L e₀)) := by
+  refine ⟨Sum.inl e₀, ?_, rfl⟩
+  change unfoldVertexAt L (allArrowSource e₀) e₀
+      (allArrowSource e₀) (unfoldEdgeColor L e₀) =
+    unfoldOld (allArrowSource e₀)
+  exact (unfoldVertexAt_eq_old_iff L (allArrowSource e₀) e₀
+    (allArrowSource e₀) (unfoldEdgeColor L e₀)).mpr ⟨rfl, rfl⟩
+
+def unfoldBaseReverseEdge
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V)) :
+    @Quiver.Hom (UnfoldVertex (allArrowSource e₀))
+      (unfoldQuiver L e₀)
+      (unfoldVertexAt L (allArrowSource e₀) e₀
+        (allArrowTarget e₀) (unfoldEdgeColor L e₀))
+      (unfoldOld (allArrowSource e₀)) := by
+  refine ⟨Sum.inl (allArrowReverse e₀), ?_, ?_⟩
+  · change unfoldVertexAt L (allArrowSource e₀) e₀
+        (allArrowTarget e₀) (unfoldEdgeColor L (allArrowReverse e₀)) =
+      unfoldVertexAt L (allArrowSource e₀) e₀
+        (allArrowTarget e₀) (unfoldEdgeColor L e₀)
+    rw [unfoldEdgeColor_reverse]
+  · change unfoldVertexAt L (allArrowSource e₀) e₀
+        (allArrowSource e₀) (unfoldEdgeColor L (allArrowReverse e₀)) =
+      unfoldOld (allArrowSource e₀)
+    rw [unfoldEdgeColor_reverse]
+    exact (unfoldVertexAt_eq_old_iff L (allArrowSource e₀) e₀
+      (allArrowSource e₀) (unfoldEdgeColor L e₀)).mpr ⟨rfl, rfl⟩
+
+def unfoldDuplicateForward
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V)) :
+    @Quiver.Hom (UnfoldVertex (allArrowSource e₀))
+      (unfoldQuiver L e₀)
+      (unfoldNew (allArrowSource e₀))
+      (unfoldVertexAt L (allArrowSource e₀) e₀
+        (allArrowTarget e₀) (unfoldEdgeColor L e₀)) :=
+  ⟨Sum.inr false, rfl, rfl⟩
+
+def unfoldDuplicateBackward
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V)) :
+    @Quiver.Hom (UnfoldVertex (allArrowSource e₀))
+      (unfoldQuiver L e₀)
+      (unfoldVertexAt L (allArrowSource e₀) e₀
+        (allArrowTarget e₀) (unfoldEdgeColor L e₀))
+      (unfoldNew (allArrowSource e₀)) :=
+  ⟨Sum.inr true, rfl, rfl⟩
+
+def unfoldSwitchOldNew
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V)) :
+    @Quiver.Path (UnfoldVertex (allArrowSource e₀))
+      (unfoldQuiver L e₀)
+      (unfoldOld (allArrowSource e₀))
+      (unfoldNew (allArrowSource e₀)) :=
+  by
+    letI : Quiver (UnfoldVertex (allArrowSource e₀)) := unfoldQuiver L e₀
+    exact (unfoldBaseEdge L e₀).toPath.comp
+      (unfoldDuplicateBackward L e₀).toPath
+
+def unfoldSwitchNewOld
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V)) :
+    @Quiver.Path (UnfoldVertex (allArrowSource e₀))
+      (unfoldQuiver L e₀)
+      (unfoldNew (allArrowSource e₀))
+      (unfoldOld (allArrowSource e₀)) :=
+  by
+    letI : Quiver (UnfoldVertex (allArrowSource e₀)) := unfoldQuiver L e₀
+    exact (unfoldDuplicateForward L e₀).toPath.comp
+      (unfoldBaseReverseEdge L e₀).toPath
+
+theorem unfoldSwitchOldNew_read
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V)) :
+    (@BinaryLabelling.pathRead G H (UnfoldVertex (allArrowSource e₀))
+      _ _ (unfoldQuiver L e₀) (unfoldHasReverse L e₀)
+      (unfoldLabelling L e₀) _ _ (unfoldSwitchOldNew L e₀)) = 1 := by
+  letI : Quiver (UnfoldVertex (allArrowSource e₀)) := unfoldQuiver L e₀
+  letI : HasInvolutiveReverse (UnfoldVertex (allArrowSource e₀)) :=
+    unfoldHasReverse L e₀
+  simp only [unfoldSwitchOldNew]
+  rw [BinaryLabelling.pathRead_comp,
+    BinaryLabelling.pathRead_toPath, BinaryLabelling.pathRead_toPath]
+  simp [unfoldBaseEdge, unfoldDuplicateBackward, unfoldLabelling, unfoldEdgeLabel,
+    separatedMap_factorWordInv]
+
+theorem unfoldSwitchNewOld_read
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V)) :
+    (@BinaryLabelling.pathRead G H (UnfoldVertex (allArrowSource e₀))
+      _ _ (unfoldQuiver L e₀) (unfoldHasReverse L e₀)
+      (unfoldLabelling L e₀) _ _ (unfoldSwitchNewOld L e₀)) = 1 := by
+  letI : Quiver (UnfoldVertex (allArrowSource e₀)) := unfoldQuiver L e₀
+  letI : HasInvolutiveReverse (UnfoldVertex (allArrowSource e₀)) :=
+    unfoldHasReverse L e₀
+  simp only [unfoldSwitchNewOld]
+  rw [BinaryLabelling.pathRead_comp,
+    BinaryLabelling.pathRead_toPath, BinaryLabelling.pathRead_toPath]
+  simp [unfoldDuplicateForward, unfoldBaseReverseEdge, unfoldLabelling,
+    unfoldEdgeLabel, separatedMap_factorWordInv]
+  change separatedMap (allArrowLabel L e₀) *
+    separatedMap (allArrowLabel L (allArrowReverse e₀)) = 1
+  rw [allArrowLabel_reverse]
+  simp [separatedMap_factorWordInv]
+
+/-! ### Canonical endpoints and path lifting -/
+
+def unfoldCanonical (a x : V) : UnfoldVertex a := by
+  classical
+  exact if h : x = a then unfoldOld a else Sum.inl ⟨x, h⟩
+
+theorem unfoldCanonical_eq_old (a : V) :
+    unfoldCanonical a a = unfoldOld a := by
+  simp [unfoldCanonical]
+
+theorem unfoldCanonical_eq_vertexAt_of_ne
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V)) {x : V} (hx : x ≠ allArrowSource e₀)
+    (color : Bool) :
+    unfoldCanonical (allArrowSource e₀) x =
+      unfoldVertexAt L (allArrowSource e₀) e₀ x color := by
+  simp [unfoldCanonical, unfoldVertexAt, hx]
+
+theorem unfoldVertexAt_eq_new_of_ne_color
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V)) (color : Bool)
+    (hc : color ≠ unfoldEdgeColor L e₀) :
+    unfoldVertexAt L (allArrowSource e₀) e₀
+        (allArrowSource e₀) color = unfoldNew (allArrowSource e₀) := by
+  exact (unfoldVertexAt_eq_new_iff L (allArrowSource e₀) e₀
+    (allArrowSource e₀) color).mpr ⟨rfl, hc⟩
+
+def unfoldPrePath
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V)) {x y : V} (e : x ⟶ y) :
+    @Quiver.Path (UnfoldVertex (allArrowSource e₀))
+      (unfoldQuiver L e₀)
+      (unfoldCanonical (allArrowSource e₀) x)
+      (unfoldVertexAt L (allArrowSource e₀) e₀ x
+        (unfoldEdgeColor L (allArrowOf e))) := by
+  letI : Quiver (UnfoldVertex (allArrowSource e₀)) := unfoldQuiver L e₀
+  by_cases hx : x ≠ allArrowSource e₀
+  · exact @Quiver.Path.cast (UnfoldVertex (allArrowSource e₀))
+      (unfoldQuiver L e₀)
+      (unfoldVertexAt L (allArrowSource e₀) e₀ x
+        (unfoldEdgeColor L (allArrowOf e)))
+      (unfoldVertexAt L (allArrowSource e₀) e₀ x
+        (unfoldEdgeColor L (allArrowOf e)))
+      (unfoldCanonical (allArrowSource e₀) x)
+      (unfoldVertexAt L (allArrowSource e₀) e₀ x
+        (unfoldEdgeColor L (allArrowOf e)))
+      (unfoldCanonical_eq_vertexAt_of_ne L e₀ hx
+        (unfoldEdgeColor L (allArrowOf e))).symm rfl
+      (@Quiver.Path.nil (UnfoldVertex (allArrowSource e₀))
+        (unfoldQuiver L e₀)
+        (unfoldVertexAt L (allArrowSource e₀) e₀ x
+          (unfoldEdgeColor L (allArrowOf e))))
+  · have hx' : x = allArrowSource e₀ := by
+      exact Classical.byContradiction hx
+    subst x
+    by_cases hcolor : unfoldEdgeColor L (allArrowOf e) =
+        unfoldEdgeColor L e₀
+    · exact @Quiver.Path.cast (UnfoldVertex (allArrowSource e₀))
+        (unfoldQuiver L e₀)
+        (unfoldOld (allArrowSource e₀))
+        (unfoldOld (allArrowSource e₀))
+        (unfoldCanonical (allArrowSource e₀) (allArrowSource e₀))
+        (unfoldVertexAt L (allArrowSource e₀) e₀
+          (allArrowSource e₀) (unfoldEdgeColor L (allArrowOf e)))
+        (unfoldCanonical_eq_old (allArrowSource e₀)).symm
+        ((unfoldVertexAt_eq_old_iff L (allArrowSource e₀) e₀
+          (allArrowSource e₀) (unfoldEdgeColor L (allArrowOf e))).mpr
+          ⟨rfl, hcolor⟩).symm
+        (@Quiver.Path.nil (UnfoldVertex (allArrowSource e₀))
+          (unfoldQuiver L e₀) (unfoldOld (allArrowSource e₀)))
+    · exact @Quiver.Path.cast (UnfoldVertex (allArrowSource e₀))
+        (unfoldQuiver L e₀)
+        (unfoldOld (allArrowSource e₀))
+        (unfoldNew (allArrowSource e₀))
+        (unfoldCanonical (allArrowSource e₀) (allArrowSource e₀))
+        (unfoldVertexAt L (allArrowSource e₀) e₀
+          (allArrowSource e₀) (unfoldEdgeColor L (allArrowOf e)))
+        (unfoldCanonical_eq_old (allArrowSource e₀)).symm
+        (unfoldVertexAt_eq_new_of_ne_color L e₀
+          (unfoldEdgeColor L (allArrowOf e)) hcolor).symm
+        (unfoldSwitchOldNew L e₀)
+
+def unfoldPostPath
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V)) {x y : V} (e : x ⟶ y) :
+    @Quiver.Path (UnfoldVertex (allArrowSource e₀))
+      (unfoldQuiver L e₀)
+      (unfoldVertexAt L (allArrowSource e₀) e₀ y
+        (unfoldEdgeColor L (allArrowOf e)))
+      (unfoldCanonical (allArrowSource e₀) y) := by
+  letI : Quiver (UnfoldVertex (allArrowSource e₀)) := unfoldQuiver L e₀
+  by_cases hy : y ≠ allArrowSource e₀
+  · exact @Quiver.Path.cast (UnfoldVertex (allArrowSource e₀))
+      (unfoldQuiver L e₀)
+      (unfoldVertexAt L (allArrowSource e₀) e₀ y
+        (unfoldEdgeColor L (allArrowOf e)))
+      (unfoldVertexAt L (allArrowSource e₀) e₀ y
+        (unfoldEdgeColor L (allArrowOf e)))
+      (unfoldVertexAt L (allArrowSource e₀) e₀ y
+        (unfoldEdgeColor L (allArrowOf e)))
+      (unfoldCanonical (allArrowSource e₀) y)
+      rfl
+      (unfoldCanonical_eq_vertexAt_of_ne L e₀ hy
+        (unfoldEdgeColor L (allArrowOf e))).symm
+      (@Quiver.Path.nil (UnfoldVertex (allArrowSource e₀))
+        (unfoldQuiver L e₀)
+        (unfoldVertexAt L (allArrowSource e₀) e₀ y
+          (unfoldEdgeColor L (allArrowOf e))))
+  · have hy' : y = allArrowSource e₀ := by
+      exact Classical.byContradiction hy
+    subst y
+    by_cases hcolor : unfoldEdgeColor L (allArrowOf e) =
+        unfoldEdgeColor L e₀
+    · exact @Quiver.Path.cast (UnfoldVertex (allArrowSource e₀))
+        (unfoldQuiver L e₀)
+        (unfoldOld (allArrowSource e₀))
+        (unfoldOld (allArrowSource e₀))
+        (unfoldVertexAt L (allArrowSource e₀) e₀
+          (allArrowSource e₀) (unfoldEdgeColor L (allArrowOf e)))
+        (unfoldCanonical (allArrowSource e₀) (allArrowSource e₀))
+        ((unfoldVertexAt_eq_old_iff L (allArrowSource e₀) e₀
+          (allArrowSource e₀) (unfoldEdgeColor L (allArrowOf e))).mpr
+          ⟨rfl, hcolor⟩).symm
+        (unfoldCanonical_eq_old (allArrowSource e₀)).symm
+        (@Quiver.Path.nil (UnfoldVertex (allArrowSource e₀))
+          (unfoldQuiver L e₀) (unfoldOld (allArrowSource e₀)))
+    · exact @Quiver.Path.cast (UnfoldVertex (allArrowSource e₀))
+        (unfoldQuiver L e₀)
+        (unfoldNew (allArrowSource e₀))
+        (unfoldOld (allArrowSource e₀))
+        (unfoldVertexAt L (allArrowSource e₀) e₀
+          (allArrowSource e₀) (unfoldEdgeColor L (allArrowOf e)))
+        (unfoldCanonical (allArrowSource e₀) (allArrowSource e₀))
+        (unfoldVertexAt_eq_new_of_ne_color L e₀
+          (unfoldEdgeColor L (allArrowOf e)) hcolor).symm
+        (unfoldCanonical_eq_old (allArrowSource e₀)).symm
+        (unfoldSwitchNewOld L e₀)
+
+def unfoldLiftEdge
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V)) {x y : V} (e : x ⟶ y) :
+    @Quiver.Path (UnfoldVertex (allArrowSource e₀))
+      (unfoldQuiver L e₀)
+      (unfoldCanonical (allArrowSource e₀) x)
+      (unfoldCanonical (allArrowSource e₀) y) := by
+  letI : Quiver (UnfoldVertex (allArrowSource e₀)) := unfoldQuiver L e₀
+  exact (unfoldPrePath L e₀ e).comp
+    ((unfoldOriginalEdgeAtColor L e₀ e
+      (unfoldEdgeColor L (allArrowOf e)) rfl).toPath.comp
+      (unfoldPostPath L e₀ e))
+
+theorem unfoldPrePath_read
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V)) {x y : V} (e : x ⟶ y) :
+    (@BinaryLabelling.pathRead G H (UnfoldVertex (allArrowSource e₀))
+      _ _ (unfoldQuiver L e₀) (unfoldHasReverse L e₀)
+      (unfoldLabelling L e₀) _ _ (unfoldPrePath L e₀ e)) = 1 := by
+  letI : Quiver (UnfoldVertex (allArrowSource e₀)) := unfoldQuiver L e₀
+  letI : HasInvolutiveReverse (UnfoldVertex (allArrowSource e₀)) :=
+    unfoldHasReverse L e₀
+  by_cases hx : x ≠ allArrowSource e₀
+  · simp [unfoldPrePath, hx, unfoldCanonical_eq_vertexAt_of_ne,
+      BinaryLabelling.pathRead_cast]
+  · have hx' : x = allArrowSource e₀ := by
+      exact Classical.byContradiction hx
+    subst x
+    by_cases hcolor : unfoldEdgeColor L (allArrowOf e) =
+        unfoldEdgeColor L e₀
+    · simp [unfoldPrePath, hx, hcolor, unfoldCanonical_eq_old,
+        BinaryLabelling.pathRead_cast]
+    · simp [unfoldPrePath, hx, hcolor, unfoldCanonical_eq_old,
+        BinaryLabelling.pathRead_cast, unfoldSwitchOldNew_read]
+
+theorem unfoldPostPath_read
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V)) {x y : V} (e : x ⟶ y) :
+    (@BinaryLabelling.pathRead G H (UnfoldVertex (allArrowSource e₀))
+      _ _ (unfoldQuiver L e₀) (unfoldHasReverse L e₀)
+      (unfoldLabelling L e₀) _ _ (unfoldPostPath L e₀ e)) = 1 := by
+  letI : Quiver (UnfoldVertex (allArrowSource e₀)) := unfoldQuiver L e₀
+  letI : HasInvolutiveReverse (UnfoldVertex (allArrowSource e₀)) :=
+    unfoldHasReverse L e₀
+  by_cases hy : y ≠ allArrowSource e₀
+  · simp [unfoldPostPath, hy, unfoldCanonical_eq_vertexAt_of_ne,
+      BinaryLabelling.pathRead_cast]
+  · have hy' : y = allArrowSource e₀ := by
+      exact Classical.byContradiction hy
+    subst y
+    by_cases hcolor : unfoldEdgeColor L (allArrowOf e) =
+        unfoldEdgeColor L e₀
+    · simp [unfoldPostPath, hy, hcolor, unfoldCanonical_eq_old,
+        BinaryLabelling.pathRead_cast]
+    · simp [unfoldPostPath, hy, hcolor, unfoldCanonical_eq_old,
+        BinaryLabelling.pathRead_cast, unfoldSwitchNewOld_read]
+
+theorem unfoldLiftEdge_read
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V)) {x y : V} (e : x ⟶ y) :
+    (@BinaryLabelling.pathRead G H (UnfoldVertex (allArrowSource e₀))
+      _ _ (unfoldQuiver L e₀) (unfoldHasReverse L e₀)
+      (unfoldLabelling L e₀) _ _ (unfoldLiftEdge L e₀ e)) =
+      L.pathRead e.toPath := by
+  letI : Quiver (UnfoldVertex (allArrowSource e₀)) := unfoldQuiver L e₀
+  letI : HasInvolutiveReverse (UnfoldVertex (allArrowSource e₀)) :=
+    unfoldHasReverse L e₀
+  rw [unfoldLiftEdge, BinaryLabelling.pathRead_comp,
+    BinaryLabelling.pathRead_comp, unfoldPrePath_read,
+    BinaryLabelling.pathRead_toPath, unfoldPostPath_read]
+  simpa [unfoldLabelling] using congrArg separatedMap
+    (unfoldOriginalEdgeAtColor_label L e₀ e
+      (unfoldEdgeColor L (allArrowOf e)) rfl)
+
+def unfoldLiftPath
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V)) :
+    ∀ {x y : V}, @Quiver.Path V _ x y →
+      @Quiver.Path (UnfoldVertex (allArrowSource e₀))
+        (unfoldQuiver L e₀)
+        (unfoldCanonical (allArrowSource e₀) x)
+        (unfoldCanonical (allArrowSource e₀) y)
+  | _, _, Quiver.Path.nil =>
+      @Quiver.Path.nil (UnfoldVertex (allArrowSource e₀))
+        (unfoldQuiver L e₀) _
+  | _, _, Quiver.Path.cons p e =>
+      @Quiver.Path.comp (UnfoldVertex (allArrowSource e₀))
+        (unfoldQuiver L e₀) _ _ _
+        (unfoldLiftPath L e₀ p)
+        (unfoldLiftEdge L e₀ e)
+
+theorem unfoldLiftPath_read
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V)) {x y : V}
+    (p : @Quiver.Path V _ x y) :
+    (@BinaryLabelling.pathRead G H (UnfoldVertex (allArrowSource e₀))
+      _ _ (unfoldQuiver L e₀) (unfoldHasReverse L e₀)
+      (unfoldLabelling L e₀) _ _ (unfoldLiftPath L e₀ p)) =
+      L.pathRead p := by
+  letI : Quiver (UnfoldVertex (allArrowSource e₀)) := unfoldQuiver L e₀
+  letI : HasInvolutiveReverse (UnfoldVertex (allArrowSource e₀)) :=
+    unfoldHasReverse L e₀
+  induction p with
+  | nil =>
+      simp [unfoldLiftPath]
+  | cons p e ih =>
+      rw [unfoldLiftPath, BinaryLabelling.pathRead_comp, ih,
+        unfoldLiftEdge_read]
+      rw [← Path.comp_toPath_eq_cons, L.pathRead_comp]
+
+def unfoldSymmLiftArrow
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V)) {x y : Symmetrify V}
+    (e : @Quiver.Hom (Symmetrify V)
+      (@Quiver.symmetrifyQuiver V _) x y) :
+    @Quiver.Path (UnfoldVertex (allArrowSource e₀))
+      (unfoldQuiver L e₀)
+      (unfoldCanonical (allArrowSource e₀) (show V from x))
+      (unfoldCanonical (allArrowSource e₀) (show V from y)) := by
+  letI : Quiver (UnfoldVertex (allArrowSource e₀)) := unfoldQuiver L e₀
+  letI : HasInvolutiveReverse (UnfoldVertex (allArrowSource e₀)) :=
+    unfoldHasReverse L e₀
+  cases e with
+  | inl f =>
+      exact unfoldLiftEdge L e₀ f
+  | inr f =>
+      exact @Quiver.Path.reverse (UnfoldVertex (allArrowSource e₀))
+        (unfoldQuiver L e₀) (unfoldHasReverse L e₀).toHasReverse _ _
+        (unfoldLiftEdge L e₀ f)
+
+def unfoldSymmLiftPath
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V)) :
+    ∀ {x y : Symmetrify V},
+      @Quiver.Path (Symmetrify V) (@Quiver.symmetrifyQuiver V _) x y →
+      @Quiver.Path (UnfoldVertex (allArrowSource e₀))
+        (unfoldQuiver L e₀)
+        (unfoldCanonical (allArrowSource e₀) (show V from x))
+        (unfoldCanonical (allArrowSource e₀) (show V from y))
+  | _, _, Quiver.Path.nil =>
+      @Quiver.Path.nil (UnfoldVertex (allArrowSource e₀))
+        (unfoldQuiver L e₀) _
+  | _, _, Quiver.Path.cons p e =>
+      @Quiver.Path.comp (UnfoldVertex (allArrowSource e₀))
+        (unfoldQuiver L e₀) _ _ _
+        (unfoldSymmLiftPath L e₀ p)
+        (unfoldSymmLiftArrow L e₀ e)
+
+theorem unfoldSymmLiftArrow_read
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V)) {x y : Symmetrify V}
+    (e : @Quiver.Hom (Symmetrify V)
+      (@Quiver.symmetrifyQuiver V _) x y) :
+    (@BinaryLabelling.pathRead G H (UnfoldVertex (allArrowSource e₀))
+      _ _ (unfoldQuiver L e₀) (unfoldHasReverse L e₀)
+      (unfoldLabelling L e₀) _ _ (unfoldSymmLiftArrow L e₀ e)) =
+      separatedMap (L.symmLabel e) := by
+  letI : Quiver (UnfoldVertex (allArrowSource e₀)) := unfoldQuiver L e₀
+  letI : HasInvolutiveReverse (UnfoldVertex (allArrowSource e₀)) :=
+    unfoldHasReverse L e₀
+  cases e with
+  | inl f =>
+      simpa [unfoldSymmLiftArrow, BinaryLabelling.pathRead_toPath,
+        BinaryLabelling.symmLabel] using
+        unfoldLiftEdge_read L e₀ f
+  | inr f =>
+      rw [unfoldSymmLiftArrow, BinaryLabelling.pathRead_reverse,
+        unfoldLiftEdge_read, BinaryLabelling.pathRead_toPath]
+      change (separatedMap (L.label f))⁻¹ =
+        separatedMap (factorWordInv (L.label f))
+      rw [← separatedMap_factorWordInv]
+
+theorem unfoldSymmLiftPath_read
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V)) {x y : Symmetrify V}
+    (p : @Quiver.Path (Symmetrify V)
+      (@Quiver.symmetrifyQuiver V _) x y) :
+    (@BinaryLabelling.pathRead G H (UnfoldVertex (allArrowSource e₀))
+      _ _ (unfoldQuiver L e₀) (unfoldHasReverse L e₀)
+      (unfoldLabelling L e₀) _ _ (unfoldSymmLiftPath L e₀ p)) =
+      L.symmPathRead p := by
+  letI : Quiver (UnfoldVertex (allArrowSource e₀)) := unfoldQuiver L e₀
+  letI : HasInvolutiveReverse (UnfoldVertex (allArrowSource e₀)) :=
+    unfoldHasReverse L e₀
+  induction p with
+  | nil =>
+      simp [unfoldSymmLiftPath, BinaryLabelling.pathRead,
+        BinaryLabelling.pathLabels, BinaryLabelling.symmPathRead,
+        BinaryLabelling.symmPathLabels, factorWordProd]
+  | cons p e ih =>
+      rw [unfoldSymmLiftPath, BinaryLabelling.pathRead_comp, ih,
+        unfoldSymmLiftArrow_read]
+      rw [← Path.comp_toPath_eq_cons, L.symmPathRead_comp,
+        L.symmPathRead_toPath]
+
+def unfoldSymmMonochromaticPath
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V)) (color : Bool) :
+    ∀ {x y : Symmetrify V},
+      (p : @Quiver.Path (Symmetrify V)
+        (@Quiver.symmetrifyQuiver V _) x y) →
+      L.symmIsMonochromatic p color →
+      @Quiver.Path (UnfoldVertex (allArrowSource e₀))
+        (unfoldQuiver L e₀)
+        (unfoldVertexAt L (allArrowSource e₀) e₀ (show V from x) color)
+        (unfoldVertexAt L (allArrowSource e₀) e₀ (show V from y) color)
+  | _, _, Quiver.Path.nil, _ =>
+      @Quiver.Path.nil (UnfoldVertex (allArrowSource e₀))
+        (unfoldQuiver L e₀) _
+  | _, _, Quiver.Path.cons p e, hp => by
+      have htail : L.symmIsMonochromatic p color := by
+        intro z hz
+        exact hp z (by
+          simp only [BinaryLabelling.symmPathLabels, List.mem_append]
+          exact Or.inl hz)
+      have hecolor' :
+          binarySumIndex (G := G) (H := H) (L.symmLabel e) = color := by
+        exact hp (L.symmLabel e) (by
+          simp only [BinaryLabelling.symmPathLabels, List.mem_append,
+            List.mem_singleton]
+          exact Or.inr trivial)
+      cases e with
+      | inl f =>
+          have hecolor :
+              binarySumIndex (G := G) (H := H) (L.label f) = color := by
+            simpa [BinaryLabelling.symmLabel] using hecolor'
+          have hfmono : L.IsMonochromatic f.toPath color := by
+            intro z hz
+            have hz' : z = L.label f := by
+              simpa only [BinaryLabelling.pathLabels_toPath,
+                List.mem_singleton] using hz
+            rw [hz']
+            exact hecolor
+          exact @Quiver.Path.comp (UnfoldVertex (allArrowSource e₀))
+            (unfoldQuiver L e₀) _ _ _
+            (unfoldSymmMonochromaticPath L e₀ color p htail)
+            (unfoldMonochromaticPath L e₀ color f.toPath hfmono)
+      | inr f =>
+          have hecolor :
+              binarySumIndex (G := G) (H := H) (L.label f) = color := by
+            change binarySumIndex (G := G) (H := H)
+              (factorWordInv (L.label f)) = color at hecolor'
+            simpa only [binarySumIndex_factorWordInv] using hecolor'
+          have hfmono : L.IsMonochromatic f.toPath color := by
+            intro z hz
+            have hz' : z = L.label f := by
+              simpa only [BinaryLabelling.pathLabels_toPath,
+                List.mem_singleton] using hz
+            rw [hz']
+            exact hecolor
+          exact @Quiver.Path.comp (UnfoldVertex (allArrowSource e₀))
+            (unfoldQuiver L e₀) _ _ _
+            (unfoldSymmMonochromaticPath L e₀ color p htail)
+            (@Quiver.Path.reverse (UnfoldVertex (allArrowSource e₀))
+              (unfoldQuiver L e₀) (unfoldHasReverse L e₀).toHasReverse _ _
+              (unfoldMonochromaticPath L e₀ color f.toPath hfmono))
+
+theorem unfoldSymmMonochromaticPath_read
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V)) (color : Bool)
+    {x y : Symmetrify V}
+    (p : @Quiver.Path (Symmetrify V)
+      (@Quiver.symmetrifyQuiver V _) x y)
+    (hp : L.symmIsMonochromatic p color) :
+    (@BinaryLabelling.pathRead G H (UnfoldVertex (allArrowSource e₀))
+      _ _ (unfoldQuiver L e₀) (unfoldHasReverse L e₀)
+      (unfoldLabelling L e₀) _ _
+      (unfoldSymmMonochromaticPath L e₀ color p hp)) =
+      L.symmPathRead p := by
+  letI : Quiver (UnfoldVertex (allArrowSource e₀)) := unfoldQuiver L e₀
+  letI : HasInvolutiveReverse (UnfoldVertex (allArrowSource e₀)) :=
+    unfoldHasReverse L e₀
+  induction p with
+  | nil =>
+      simp [unfoldSymmMonochromaticPath, BinaryLabelling.pathRead,
+        BinaryLabelling.symmPathRead, BinaryLabelling.pathLabels,
+        BinaryLabelling.symmPathLabels, factorWordProd]
+  | cons p e ih =>
+      have htail : L.symmIsMonochromatic p color := by
+        intro z hz
+        exact hp z (by
+          simp only [BinaryLabelling.symmPathLabels, List.mem_append]
+          exact Or.inl hz)
+      cases e with
+      | inl f =>
+          rw [unfoldSymmMonochromaticPath, BinaryLabelling.pathRead_comp,
+            ih htail]
+          have hecolor :
+              binarySumIndex (G := G) (H := H) (L.label f) = color := by
+            exact hp (L.label f) (by
+              simp only [BinaryLabelling.symmPathLabels, List.mem_append,
+                List.mem_singleton, BinaryLabelling.symmLabel]
+              exact Or.inr trivial)
+          have hfmono : L.IsMonochromatic f.toPath color := by
+            intro z hz
+            have hz' : z = L.label f := by
+              simpa only [BinaryLabelling.pathLabels_toPath,
+                List.mem_singleton] using hz
+            rw [hz']
+            exact hecolor
+          rw [unfoldMonochromaticPath_read L e₀ color f.toPath hfmono,
+            ← Path.comp_toPath_eq_cons, L.symmPathRead_comp,
+            L.symmPathRead_toPath, L.pathRead_toPath]
+          simp [BinaryLabelling.symmLabel]
+      | inr f =>
+          rw [unfoldSymmMonochromaticPath, BinaryLabelling.pathRead_comp,
+            ih htail]
+          have hecolor :
+              binarySumIndex (G := G) (H := H) (L.label f) = color := by
+            have h := hp (L.symmLabel (Sum.inr f)) (by
+              simp only [BinaryLabelling.symmPathLabels, List.mem_append,
+                List.mem_singleton]
+              exact Or.inr trivial)
+            change binarySumIndex (G := G) (H := H)
+              (factorWordInv (L.label f)) = color at h
+            simpa only [binarySumIndex_factorWordInv] using h
+          have hfmono : L.IsMonochromatic f.toPath color := by
+            intro z hz
+            have hz' : z = L.label f := by
+              simpa only [BinaryLabelling.pathLabels_toPath,
+                List.mem_singleton] using hz
+            rw [hz']
+            exact hecolor
+          rw [BinaryLabelling.pathRead_reverse,
+            unfoldMonochromaticPath_read L e₀ color f.toPath hfmono,
+            ← Path.comp_toPath_eq_cons, L.symmPathRead_comp,
+            L.symmPathRead_toPath, L.pathRead_toPath]
+          simp [BinaryLabelling.symmLabel, separatedMap_factorWordInv]
+
+/-! ### The duplicated edge and its complementary tail -/
+
+def unfoldDuplicatePath
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V))
+    {b : Symmetrify V}
+    (q : @Quiver.Path (Symmetrify V)
+      (@Quiver.symmetrifyQuiver V _) (show V from allArrowTarget e₀) b)
+    (hq : L.symmIsMonochromatic q (unfoldEdgeColor L e₀)) :
+    @Quiver.Path (UnfoldVertex (allArrowSource e₀))
+      (unfoldQuiver L e₀)
+      (unfoldNew (allArrowSource e₀))
+      (unfoldVertexAt L (allArrowSource e₀) e₀ (show V from b)
+        (unfoldEdgeColor L e₀)) := by
+  letI : Quiver (UnfoldVertex (allArrowSource e₀)) := unfoldQuiver L e₀
+  exact (unfoldDuplicateForward L e₀).toPath.comp
+    (unfoldSymmMonochromaticPath L e₀ (unfoldEdgeColor L e₀) q hq)
+
+theorem unfoldDuplicatePath_read
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V))
+    {b : Symmetrify V}
+    (q : @Quiver.Path (Symmetrify V)
+      (@Quiver.symmetrifyQuiver V _) (show V from allArrowTarget e₀) b)
+    (hq : L.symmIsMonochromatic q (unfoldEdgeColor L e₀)) :
+    (@BinaryLabelling.pathRead G H (UnfoldVertex (allArrowSource e₀))
+      _ _ (unfoldQuiver L e₀) (unfoldHasReverse L e₀)
+      (unfoldLabelling L e₀) _ _
+      (unfoldDuplicatePath L e₀ q hq)) =
+      separatedMap (allArrowLabel L e₀) * L.symmPathRead q := by
+  letI : Quiver (UnfoldVertex (allArrowSource e₀)) := unfoldQuiver L e₀
+  letI : HasInvolutiveReverse (UnfoldVertex (allArrowSource e₀)) :=
+    unfoldHasReverse L e₀
+  rw [unfoldDuplicatePath, BinaryLabelling.pathRead_comp,
+    BinaryLabelling.pathRead_toPath,
+    unfoldSymmMonochromaticPath_read]
+  simp [unfoldDuplicateForward, unfoldLabelling, unfoldEdgeLabel]
+
+def unfoldPathEdges
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V)) :
+    ∀ {x y : UnfoldVertex (allArrowSource e₀)},
+      @Quiver.Path (UnfoldVertex (allArrowSource e₀))
+        (unfoldQuiver L e₀) x y → List (UnfoldEdge (V := V) e₀)
+  := by
+    letI : Quiver (UnfoldVertex (allArrowSource e₀)) := unfoldQuiver L e₀
+    intro x y p
+    induction p with
+    | nil => exact []
+    | cons p e ih => exact ih ++ [e.1]
+
+theorem unfoldPathEdges_comp
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V))
+    {x y : UnfoldVertex (allArrowSource e₀)}
+    (p : @Quiver.Path (UnfoldVertex (allArrowSource e₀))
+      (unfoldQuiver L e₀) x y) :
+    ∀ {z : UnfoldVertex (allArrowSource e₀)}
+      (q : @Quiver.Path (UnfoldVertex (allArrowSource e₀))
+        (unfoldQuiver L e₀) y z),
+      unfoldPathEdges L e₀
+          (@Quiver.Path.comp (UnfoldVertex (allArrowSource e₀))
+            (unfoldQuiver L e₀) _ _ _ p q) =
+        unfoldPathEdges L e₀ p ++ unfoldPathEdges L e₀ q
+    := by
+    letI : Quiver (UnfoldVertex (allArrowSource e₀)) := unfoldQuiver L e₀
+    intro z q
+    induction q with
+    | nil => simp [unfoldPathEdges]
+    | cons q e ih =>
+        change unfoldPathEdges L e₀ (p.comp q) ++ [e.1] =
+          unfoldPathEdges L e₀ p ++
+            (unfoldPathEdges L e₀ q ++ [e.1])
+        rw [ih, List.append_assoc]
+
+theorem unfoldPathEdges_reverse
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V))
+    {x y : UnfoldVertex (allArrowSource e₀)}
+    (p : @Quiver.Path (UnfoldVertex (allArrowSource e₀))
+      (unfoldQuiver L e₀) x y) :
+    unfoldPathEdges L e₀
+        (@Quiver.Path.reverse (UnfoldVertex (allArrowSource e₀))
+          (unfoldQuiver L e₀) (unfoldHasReverse L e₀).toHasReverse _ _ p) =
+      (unfoldPathEdges L e₀ p).reverse.map unfoldEdgeReverse := by
+  letI : Quiver (UnfoldVertex (allArrowSource e₀)) := unfoldQuiver L e₀
+  letI : HasInvolutiveReverse (UnfoldVertex (allArrowSource e₀)) :=
+    unfoldHasReverse L e₀
+  induction p with
+  | nil => rfl
+  | cons p e ih =>
+      change unfoldPathEdges L e₀
+          ((Quiver.reverse e).toPath.comp p.reverse) =
+        (unfoldPathEdges L e₀ p ++ [e.1]).reverse.map unfoldEdgeReverse
+      rw [unfoldPathEdges_comp L e₀, ih]
+      rw [List.reverse_append]
+      simp only [List.reverse_cons, List.reverse_nil]
+      change [unfoldEdgeReverse e.1] ++
+          (unfoldPathEdges L e₀ p).reverse.map unfoldEdgeReverse =
+        List.map unfoldEdgeReverse
+          ([e.1] ++ (unfoldPathEdges L e₀ p).reverse)
+      rfl
+
+theorem unfoldMonochromaticPath_edges_original
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V)) (color : Bool)
+    {x y : V} (p : @Quiver.Path V _ x y)
+    (hp : L.IsMonochromatic p color) :
+    ∀ z ∈ unfoldPathEdges L e₀
+        (unfoldMonochromaticPath L e₀ color p hp),
+      ∃ f : AllArrow (V := V), z = Sum.inl f := by
+  induction p with
+  | nil =>
+      simp [unfoldMonochromaticPath, unfoldPathEdges]
+  | cons p e ih =>
+      have htail : L.IsMonochromatic p color := by
+        intro z hz
+        exact hp z (by
+          simp only [BinaryLabelling.pathLabels, List.mem_append]
+          exact Or.inl hz)
+      have hecolor :
+          binarySumIndex (G := G) (H := H) (L.label e) = color := by
+        exact hp (L.label e) (by
+          simp only [BinaryLabelling.pathLabels, List.mem_append,
+            List.mem_singleton]
+          exact Or.inr trivial)
+      have ih' := ih htail
+      simp only [unfoldMonochromaticPath, unfoldPathEdges]
+      intro z hz
+      rcases List.mem_append.mp hz with hz | hz
+      · exact ih' z hz
+      · obtain rfl := List.mem_singleton.mp hz
+        exact ⟨allArrowOf e, rfl⟩
+
+theorem unfoldSymmMonochromaticPath_edges_original
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V)) (color : Bool)
+    {x y : Symmetrify V}
+    (p : @Quiver.Path (Symmetrify V)
+      (@Quiver.symmetrifyQuiver V _) x y)
+    (hp : L.symmIsMonochromatic p color) :
+    ∀ z ∈ unfoldPathEdges L e₀
+        (unfoldSymmMonochromaticPath L e₀ color p hp),
+      ∃ f : AllArrow (V := V), z = Sum.inl f := by
+  letI : Quiver (UnfoldVertex (allArrowSource e₀)) := unfoldQuiver L e₀
+  letI : HasInvolutiveReverse (UnfoldVertex (allArrowSource e₀)) :=
+    unfoldHasReverse L e₀
+  induction p with
+  | nil =>
+      simp [unfoldSymmMonochromaticPath, unfoldPathEdges]
+  | cons p e ih =>
+      have htail : L.symmIsMonochromatic p color := by
+        intro z hz
+        exact hp z (by
+          simp only [BinaryLabelling.symmPathLabels, List.mem_append]
+          exact Or.inl hz)
+      have ih' := ih htail
+      cases e with
+      | inl f =>
+          have hecolor :
+              binarySumIndex (G := G) (H := H) (L.label f) = color := by
+            exact hp (L.label f) (by
+              simp only [BinaryLabelling.symmPathLabels, List.mem_append,
+                List.mem_singleton, BinaryLabelling.symmLabel]
+              exact Or.inr trivial)
+          have hfmono : L.IsMonochromatic f.toPath color := by
+            intro z hz
+            have hz' : z = L.label f := by
+              simpa only [BinaryLabelling.pathLabels_toPath,
+                List.mem_singleton] using hz
+            rw [hz']
+            exact hecolor
+          rw [unfoldSymmMonochromaticPath, unfoldPathEdges_comp]
+          intro z hz
+          rcases List.mem_append.mp hz with hz | hz
+          · exact ih' z hz
+          · exact unfoldMonochromaticPath_edges_original L e₀ color
+              f.toPath hfmono z hz
+      | inr f =>
+          have hecolor :
+              binarySumIndex (G := G) (H := H) (L.label f) = color := by
+            have h := hp (L.symmLabel (Sum.inr f)) (by
+              simp only [BinaryLabelling.symmPathLabels, List.mem_append,
+                List.mem_singleton]
+              exact Or.inr trivial)
+            change binarySumIndex (G := G) (H := H)
+              (factorWordInv (L.label f)) = color at h
+            simpa only [binarySumIndex_factorWordInv] using h
+          have hfmono : L.IsMonochromatic f.toPath color := by
+            intro z hz
+            have hz' : z = L.label f := by
+              simpa only [BinaryLabelling.pathLabels_toPath,
+                List.mem_singleton] using hz
+            rw [hz']
+            exact hecolor
+          rw [unfoldSymmMonochromaticPath, unfoldPathEdges_comp]
+          intro z hz
+          rcases List.mem_append.mp hz with hz | hz
+          · exact ih' z hz
+          · have hrev := unfoldPathEdges_reverse L e₀
+                (unfoldMonochromaticPath L e₀ color f.toPath hfmono)
+            rw [hrev] at hz
+            obtain ⟨w, hw, rfl⟩ := List.mem_map.mp hz
+            have hw' : w ∈ unfoldPathEdges L e₀
+                (unfoldMonochromaticPath L e₀ color f.toPath hfmono) :=
+              List.mem_reverse.mp hw
+            obtain ⟨g, hg⟩ := unfoldMonochromaticPath_edges_original
+              L e₀ color f.toPath hfmono w hw'
+            refine ⟨allArrowReverse g, ?_⟩
+            rw [hg]
+            rfl
+
+theorem unfoldPath_avoid_duplicate
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V))
+    {x y : UnfoldVertex (allArrowSource e₀)}
+    (r : @Quiver.Path (UnfoldVertex (allArrowSource e₀))
+      (unfoldQuiver L e₀) x y)
+    (hr : ∀ z ∈ unfoldPathEdges L e₀ r,
+      ∃ f : AllArrow (V := V), z = Sum.inl f) :
+    letI : Quiver (UnfoldVertex (allArrowSource e₀)) := unfoldQuiver L e₀
+    letI : HasInvolutiveReverse (UnfoldVertex (allArrowSource e₀)) :=
+      unfoldHasReverse L e₀
+    foldSymmPathAvoid (qV := unfoldQuiver L e₀)
+      (allArrowOf (unfoldDuplicateForward L e₀))
+      ((@Quiver.Symmetrify.of (UnfoldVertex (allArrowSource e₀))
+        (unfoldQuiver L e₀)).mapPath r) := by
+  letI : Quiver (UnfoldVertex (allArrowSource e₀)) := unfoldQuiver L e₀
+  letI : HasInvolutiveReverse (UnfoldVertex (allArrowSource e₀)) :=
+    unfoldHasReverse L e₀
+  induction r with
+  | nil =>
+      simp [foldSymmPathAvoid]
+  | cons r e ih =>
+      have htail : ∀ z ∈ unfoldPathEdges L e₀ r,
+          ∃ f : AllArrow (V := V), z = Sum.inl f := by
+        intro z hz
+        apply hr z
+        change z ∈ unfoldPathEdges L e₀ r ++ [e.1]
+        exact List.mem_append.mpr (Or.inl hz)
+      have he : ∃ f : AllArrow (V := V), e.1 = Sum.inl f := by
+        apply hr e.1
+        change e.1 ∈ unfoldPathEdges L e₀ r ++ [e.1]
+        exact List.mem_append.mpr (Or.inr (by simp))
+      have hih := ih htail
+      obtain ⟨f, hf⟩ := he
+      have hne : allArrowOf e ≠
+          allArrowOf (unfoldDuplicateForward L e₀) := by
+        intro h
+        have h' := congrArg (fun z : AllArrow
+            (V := UnfoldVertex (allArrowSource e₀)) => z.2.2.1) h
+        change e.1 = Sum.inr false at h'
+        rw [hf] at h'
+        cases h'
+      have hne' : allArrowOf e ≠
+          allArrowReverse (allArrowOf (unfoldDuplicateForward L e₀)) := by
+        intro h
+        have h' := congrArg (fun z : AllArrow
+            (V := UnfoldVertex (allArrowSource e₀)) => z.2.2.1) h
+        change e.1 = Sum.inr true at h'
+        rw [hf] at h'
+        cases h'
+      change foldSymmPathAvoid (qV := unfoldQuiver L e₀)
+        (allArrowOf (unfoldDuplicateForward L e₀))
+        (((@Quiver.Symmetrify.of (UnfoldVertex (allArrowSource e₀))
+          (unfoldQuiver L e₀)).mapPath r).cons
+          ((@Quiver.Symmetrify.of (UnfoldVertex (allArrowSource e₀))
+            (unfoldQuiver L e₀)).map e))
+      simpa only [foldSymmPathAvoid] using ⟨hih, hne, hne'⟩
+
+def unfoldDuplicateFoldPath
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V))
+    {b : Symmetrify V}
+    (q : @Quiver.Path (Symmetrify V)
+      (@Quiver.symmetrifyQuiver V _) (show V from allArrowTarget e₀) b)
+    (hq : L.symmIsMonochromatic q (unfoldEdgeColor L e₀)) :
+    @Quiver.Path (Symmetrify (UnfoldVertex (allArrowSource e₀)))
+      (@Quiver.symmetrifyQuiver (UnfoldVertex (allArrowSource e₀))
+        (unfoldQuiver L e₀))
+      (unfoldNew (allArrowSource e₀))
+      (unfoldVertexAt L (allArrowSource e₀) e₀ (show V from b)
+        (unfoldEdgeColor L e₀)) := by
+  letI : Quiver (UnfoldVertex (allArrowSource e₀)) := unfoldQuiver L e₀
+  let eD : @Quiver.Hom (Symmetrify (UnfoldVertex (allArrowSource e₀)))
+      (@Quiver.symmetrifyQuiver (UnfoldVertex (allArrowSource e₀))
+        (unfoldQuiver L e₀))
+      (unfoldNew (allArrowSource e₀))
+      (unfoldVertexAt L (allArrowSource e₀) e₀ (allArrowTarget e₀)
+        (unfoldEdgeColor L e₀)) :=
+    Sum.inl (unfoldDuplicateForward L e₀)
+  exact eD.toPath.comp
+    ((@Quiver.Symmetrify.of (UnfoldVertex (allArrowSource e₀))
+      (unfoldQuiver L e₀)).mapPath
+      (unfoldSymmMonochromaticPath L e₀ (unfoldEdgeColor L e₀) q hq))
+
+theorem unfoldDuplicateFoldPath_read
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V))
+    {b : Symmetrify V}
+    (q : @Quiver.Path (Symmetrify V)
+      (@Quiver.symmetrifyQuiver V _) (show V from allArrowTarget e₀) b)
+    (hq : L.symmIsMonochromatic q (unfoldEdgeColor L e₀)) :
+    letI : Quiver (UnfoldVertex (allArrowSource e₀)) := unfoldQuiver L e₀
+    letI : HasInvolutiveReverse (UnfoldVertex (allArrowSource e₀)) :=
+      unfoldHasReverse L e₀
+    (unfoldLabelling L e₀).symmPathRead
+      (unfoldDuplicateFoldPath L e₀ q hq) =
+      separatedMap (allArrowLabel L e₀) * L.symmPathRead q := by
+  letI : Quiver (UnfoldVertex (allArrowSource e₀)) := unfoldQuiver L e₀
+  letI : HasInvolutiveReverse (UnfoldVertex (allArrowSource e₀)) :=
+    unfoldHasReverse L e₀
+  let qlift := unfoldSymmMonochromaticPath L e₀
+    (unfoldEdgeColor L e₀) q hq
+  let eD : @Quiver.Hom (Symmetrify (UnfoldVertex (allArrowSource e₀)))
+      (@Quiver.symmetrifyQuiver (UnfoldVertex (allArrowSource e₀))
+        (unfoldQuiver L e₀))
+      (unfoldNew (allArrowSource e₀))
+      (unfoldVertexAt L (allArrowSource e₀) e₀ (allArrowTarget e₀)
+        (unfoldEdgeColor L e₀)) :=
+    Sum.inl (unfoldDuplicateForward L e₀)
+  have hD : (unfoldLabelling L e₀).symmPathRead eD.toPath =
+      separatedMap (allArrowLabel L e₀) := by
+    rw [BinaryLabelling.symmPathRead_toPath]
+    change separatedMap (unfoldEdgeLabel L e₀ (Sum.inr false)) = _
+    rfl
+  have hmap : (unfoldLabelling L e₀).symmPathRead
+        ((@Quiver.Symmetrify.of (UnfoldVertex (allArrowSource e₀))
+          (unfoldQuiver L e₀)).mapPath qlift) =
+      (unfoldLabelling L e₀).pathRead qlift :=
+    (unfoldLabelling L e₀).symmPathRead_map_of qlift
+  change (unfoldLabelling L e₀).symmPathRead
+      (eD.toPath.comp
+        ((@Quiver.Symmetrify.of (UnfoldVertex (allArrowSource e₀))
+          (unfoldQuiver L e₀)).mapPath qlift)) = _
+  rw [BinaryLabelling.symmPathRead_comp, hD]
+  congr 1
+  calc
+    (unfoldLabelling L e₀).symmPathRead
+        ((@Quiver.Symmetrify.of (UnfoldVertex (allArrowSource e₀))
+          (unfoldQuiver L e₀)).mapPath qlift) =
+      (unfoldLabelling L e₀).pathRead qlift := hmap
+    _ = L.symmPathRead q :=
+      unfoldSymmMonochromaticPath_read L e₀
+        (unfoldEdgeColor L e₀) q hq
+
+theorem unfold_duplicate_safe_tail
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V))
+    {b : Symmetrify V}
+    (q : @Quiver.Path (Symmetrify V)
+      (@Quiver.symmetrifyQuiver V _)
+      (show V from allArrowTarget e₀)
+      b)
+    (hq : L.symmIsMonochromatic q (unfoldEdgeColor L e₀))
+    (hread : L.symmPathRead q =
+      (separatedMap (allArrowLabel L e₀))⁻¹) :
+    letI : Quiver (UnfoldVertex (allArrowSource e₀)) := unfoldQuiver L e₀
+    letI : HasInvolutiveReverse (UnfoldVertex (allArrowSource e₀)) :=
+      unfoldHasReverse L e₀
+    foldSymmPathAvoid (qV := unfoldQuiver L e₀)
+        (allArrowOf (unfoldDuplicateForward L e₀))
+        ((@Quiver.Symmetrify.of (UnfoldVertex (allArrowSource e₀))
+          (unfoldQuiver L e₀)).mapPath
+          (unfoldSymmMonochromaticPath L e₀
+            (unfoldEdgeColor L e₀) q hq)) ∧
+      (unfoldLabelling L e₀).symmPathRead
+        (unfoldDuplicateFoldPath L e₀ q hq) = 1 := by
+  letI : Quiver (UnfoldVertex (allArrowSource e₀)) := unfoldQuiver L e₀
+  letI : HasInvolutiveReverse (UnfoldVertex (allArrowSource e₀)) :=
+    unfoldHasReverse L e₀
+  constructor
+  · exact unfoldPath_avoid_duplicate L e₀
+      (unfoldSymmMonochromaticPath L e₀
+        (unfoldEdgeColor L e₀) q hq)
+      (unfoldSymmMonochromaticPath_edges_original L e₀
+        (unfoldEdgeColor L e₀) q hq)
+  · rw [unfoldDuplicateFoldPath_read L e₀ q hq, hread,
+      mul_inv_cancel]
+
+theorem unfoldDuplicateFoldPath_target_eq_old
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V))
+    (q : @Quiver.Path (Symmetrify V)
+      (@Quiver.symmetrifyQuiver V _)
+      (show V from allArrowTarget e₀)
+      (show V from allArrowSource e₀))
+    (hq : L.symmIsMonochromatic q (unfoldEdgeColor L e₀)) :
+    unfoldVertexAt L (allArrowSource e₀) e₀
+        (show V from allArrowSource e₀) (unfoldEdgeColor L e₀) =
+      unfoldOld (allArrowSource e₀) := by
+  exact (unfoldVertexAt_eq_old_iff L (allArrowSource e₀) e₀
+    (allArrowSource e₀) (unfoldEdgeColor L e₀)).mpr ⟨rfl, rfl⟩
+
+def unfoldedMarkedGraph {n : ℕ}
+    (M : MarkedBinaryGraph (G := G) (H := H) (V := V) n)
+    (e₀ : AllArrow (V := V))
+    (ha : allArrowSource e₀ = M.base) :
+    @MarkedBinaryGraph G H (UnfoldVertex (allArrowSource e₀))
+      _ _ (unfoldQuiver M.labeling e₀) (unfoldHasReverse M.labeling e₀) n := by
+  letI : Quiver (UnfoldVertex (allArrowSource e₀)) :=
+    unfoldQuiver M.labeling e₀
+  letI : HasInvolutiveReverse (UnfoldVertex (allArrowSource e₀)) :=
+    unfoldHasReverse M.labeling e₀
+  have hbase :
+      unfoldCanonical (allArrowSource e₀) M.base =
+        unfoldOld (allArrowSource e₀) := by
+    calc
+      unfoldCanonical (allArrowSource e₀) M.base =
+          unfoldCanonical (allArrowSource e₀) (allArrowSource e₀) :=
+        congrArg (unfoldCanonical (allArrowSource e₀)) ha.symm
+      _ = unfoldOld (allArrowSource e₀) :=
+        unfoldCanonical_eq_old (allArrowSource e₀)
+  refine
+    { base := unfoldOld (allArrowSource e₀)
+      labeling := unfoldLabelling M.labeling e₀
+      loops := fun i => ?_ }
+  exact @Quiver.Path.cast (UnfoldVertex (allArrowSource e₀))
+    (unfoldQuiver M.labeling e₀)
+    (unfoldCanonical (allArrowSource e₀) M.base)
+    (unfoldCanonical (allArrowSource e₀) M.base)
+    (unfoldOld (allArrowSource e₀))
+    (unfoldOld (allArrowSource e₀)) hbase hbase
+    (unfoldLiftPath M.labeling e₀ (M.loops i))
+
+theorem unfoldedMarkedGraph_read {n : ℕ}
+    (M : MarkedBinaryGraph (G := G) (H := H) (V := V) n)
+    (e₀ : AllArrow (V := V))
+    (ha : allArrowSource e₀ = M.base) (i : Fin n) :
+    (@MarkedBinaryGraph.read n G H (UnfoldVertex (allArrowSource e₀)) _ _
+      (unfoldQuiver M.labeling e₀) (unfoldHasReverse M.labeling e₀)
+      (unfoldedMarkedGraph M e₀ ha)) i = M.read i := by
+  letI : Quiver (UnfoldVertex (allArrowSource e₀)) :=
+    unfoldQuiver M.labeling e₀
+  letI : HasInvolutiveReverse (UnfoldVertex (allArrowSource e₀)) :=
+    unfoldHasReverse M.labeling e₀
+  have hbase :
+      unfoldCanonical (allArrowSource e₀) M.base =
+        unfoldOld (allArrowSource e₀) := by
+    calc
+      unfoldCanonical (allArrowSource e₀) M.base =
+          unfoldCanonical (allArrowSource e₀) (allArrowSource e₀) :=
+        congrArg (unfoldCanonical (allArrowSource e₀)) ha.symm
+      _ = unfoldOld (allArrowSource e₀) :=
+        unfoldCanonical_eq_old (allArrowSource e₀)
+  change (@BinaryLabelling.pathRead G H (UnfoldVertex (allArrowSource e₀))
+      _ _ (unfoldQuiver M.labeling e₀) (unfoldHasReverse M.labeling e₀)
+      (unfoldLabelling M.labeling e₀) _ _
+      ((unfoldedMarkedGraph M e₀ ha).loops i)) =
+    M.labeling.pathRead (M.loops i)
+  change (@BinaryLabelling.pathRead G H (UnfoldVertex (allArrowSource e₀))
+      _ _ (unfoldQuiver M.labeling e₀) (unfoldHasReverse M.labeling e₀)
+      (unfoldLabelling M.labeling e₀) _ _
+      (@Quiver.Path.cast (UnfoldVertex (allArrowSource e₀))
+        (unfoldQuiver M.labeling e₀)
+        (unfoldCanonical (allArrowSource e₀) M.base)
+        (unfoldCanonical (allArrowSource e₀) M.base)
+        (unfoldOld (allArrowSource e₀))
+        (unfoldOld (allArrowSource e₀)) hbase hbase
+        (unfoldLiftPath M.labeling e₀ (M.loops i)))) =
+    M.labeling.pathRead (M.loops i)
+  rw [BinaryLabelling.pathRead_cast, unfoldLiftPath_read]
+
+theorem unfoldedMarkedGraph_isGenerating {n : ℕ}
+    (M : MarkedBinaryGraph (G := G) (H := H) (V := V) n)
+    (e₀ : AllArrow (V := V))
+    (ha : allArrowSource e₀ = M.base) (hgen : M.IsGenerating) :
+    (@MarkedBinaryGraph.IsGenerating n G H
+      (UnfoldVertex (allArrowSource e₀)) _ _
+      (unfoldQuiver M.labeling e₀) (unfoldHasReverse M.labeling e₀)
+      (unfoldedMarkedGraph M e₀ ha)) := by
+  change Subgroup.closure (Set.range (@MarkedBinaryGraph.read n G H
+    (UnfoldVertex (allArrowSource e₀)) _ _
+    (unfoldQuiver M.labeling e₀) (unfoldHasReverse M.labeling e₀)
+    (unfoldedMarkedGraph M e₀ ha))) = ⊤
+  have hread :
+      @MarkedBinaryGraph.read n G H (UnfoldVertex (allArrowSource e₀)) _ _
+        (unfoldQuiver M.labeling e₀) (unfoldHasReverse M.labeling e₀)
+        (unfoldedMarkedGraph M e₀ ha) = M.read := by
+    funext i
+    exact unfoldedMarkedGraph_read M e₀ ha i
+  rw [hread]
+  exact hgen
+
+theorem unfoldedMarkedGraph_weaklyConnected {n : ℕ}
+    (M : MarkedBinaryGraph (G := G) (H := H) (V := V) n)
+    (e₀ : AllArrow (V := V))
+    (ha : allArrowSource e₀ = M.base)
+    (hconn : M.WeaklyConnected) :
+    (@MarkedBinaryGraph.WeaklyConnected n G H
+      (UnfoldVertex (allArrowSource e₀)) _ _
+      (unfoldQuiver M.labeling e₀) (unfoldHasReverse M.labeling e₀)
+      (unfoldedMarkedGraph M e₀ ha)) := by
+  letI : Quiver (UnfoldVertex (allArrowSource e₀)) :=
+    unfoldQuiver M.labeling e₀
+  letI : HasInvolutiveReverse (UnfoldVertex (allArrowSource e₀)) :=
+    unfoldHasReverse M.labeling e₀
+  have hbase :
+      unfoldCanonical (allArrowSource e₀) M.base =
+        unfoldOld (allArrowSource e₀) := by
+    calc
+      unfoldCanonical (allArrowSource e₀) M.base =
+          unfoldCanonical (allArrowSource e₀) (allArrowSource e₀) :=
+        congrArg (unfoldCanonical (allArrowSource e₀)) ha.symm
+      _ = unfoldOld (allArrowSource e₀) :=
+        unfoldCanonical_eq_old (allArrowSource e₀)
+  intro z
+  cases z with
+  | inl z =>
+      obtain ⟨v, hv⟩ := z
+      obtain ⟨p⟩ := hconn v
+      have htarget :
+          unfoldCanonical (allArrowSource e₀) v = Sum.inl ⟨v, hv⟩ := by
+        simp [unfoldCanonical, hv]
+      refine ⟨@Prefunctor.mapPath (UnfoldVertex (allArrowSource e₀))
+        (unfoldQuiver M.labeling e₀)
+        (Symmetrify (UnfoldVertex (allArrowSource e₀)))
+        (@Quiver.symmetrifyQuiver (UnfoldVertex (allArrowSource e₀))
+          (unfoldQuiver M.labeling e₀))
+        (@Quiver.Symmetrify.of (UnfoldVertex (allArrowSource e₀))
+          (unfoldQuiver M.labeling e₀)) _ _ ?_⟩
+      exact @Quiver.Path.cast (UnfoldVertex (allArrowSource e₀))
+          (unfoldQuiver M.labeling e₀)
+          (unfoldCanonical (allArrowSource e₀) M.base)
+          (unfoldCanonical (allArrowSource e₀) v)
+          (unfoldOld (allArrowSource e₀))
+          (Sum.inl ⟨v, hv⟩) hbase htarget
+          (unfoldSymmLiftPath M.labeling e₀ p)
+  | inr b =>
+      cases b with
+      | false =>
+          refine ⟨@Prefunctor.mapPath (UnfoldVertex (allArrowSource e₀))
+            (unfoldQuiver M.labeling e₀)
+            (Symmetrify (UnfoldVertex (allArrowSource e₀)))
+            (@Quiver.symmetrifyQuiver (UnfoldVertex (allArrowSource e₀))
+              (unfoldQuiver M.labeling e₀))
+            (@Quiver.Symmetrify.of (UnfoldVertex (allArrowSource e₀))
+              (unfoldQuiver M.labeling e₀)) _ _
+            (@Quiver.Path.nil (UnfoldVertex (allArrowSource e₀))
+              (unfoldQuiver M.labeling e₀)
+              (unfoldOld (allArrowSource e₀)))⟩
+      | true =>
+          refine ⟨@Prefunctor.mapPath (UnfoldVertex (allArrowSource e₀))
+            (unfoldQuiver M.labeling e₀)
+            (Symmetrify (UnfoldVertex (allArrowSource e₀)))
+            (@Quiver.symmetrifyQuiver (UnfoldVertex (allArrowSource e₀))
+              (unfoldQuiver M.labeling e₀))
+            (@Quiver.Symmetrify.of (UnfoldVertex (allArrowSource e₀))
+              (unfoldQuiver M.labeling e₀)) _ _
+            (unfoldSwitchOldNew M.labeling e₀)⟩
+
+/-! ### Rerooting the unfolded marking at the new source -/
+
+def unfoldedMarkedGraphNew {n : ℕ}
+    (M : MarkedBinaryGraph (G := G) (H := H) (V := V) n)
+    (e₀ : AllArrow (V := V))
+    (ha : allArrowSource e₀ = M.base) :
+    @MarkedBinaryGraph G H (UnfoldVertex (allArrowSource e₀))
+      _ _ (unfoldQuiver M.labeling e₀) (unfoldHasReverse M.labeling e₀) n := by
+  letI : Quiver (UnfoldVertex (allArrowSource e₀)) :=
+    unfoldQuiver M.labeling e₀
+  letI : HasInvolutiveReverse (UnfoldVertex (allArrowSource e₀)) :=
+    unfoldHasReverse M.labeling e₀
+  have hbase :
+      (unfoldedMarkedGraph M e₀ ha).base = unfoldOld (allArrowSource e₀) := rfl
+  refine
+    { base := unfoldNew (allArrowSource e₀)
+      labeling := unfoldLabelling M.labeling e₀
+      loops := fun i => by
+        let oldLoop : @Quiver.Path (UnfoldVertex (allArrowSource e₀))
+            (unfoldQuiver M.labeling e₀)
+            (unfoldOld (allArrowSource e₀))
+            (unfoldOld (allArrowSource e₀)) :=
+          @Quiver.Path.cast (UnfoldVertex (allArrowSource e₀))
+            (unfoldQuiver M.labeling e₀)
+            (unfoldedMarkedGraph M e₀ ha).base
+            (unfoldedMarkedGraph M e₀ ha).base
+            (unfoldOld (allArrowSource e₀))
+            (unfoldOld (allArrowSource e₀)) hbase hbase
+            ((unfoldedMarkedGraph M e₀ ha).loops i)
+        exact (unfoldSwitchNewOld M.labeling e₀).comp
+          (oldLoop.comp (unfoldSwitchOldNew M.labeling e₀)) }
+
+theorem unfoldedMarkedGraphNew_read {n : ℕ}
+    (M : MarkedBinaryGraph (G := G) (H := H) (V := V) n)
+    (e₀ : AllArrow (V := V))
+    (ha : allArrowSource e₀ = M.base) (i : Fin n) :
+    (@MarkedBinaryGraph.read n G H (UnfoldVertex (allArrowSource e₀)) _ _
+      (unfoldQuiver M.labeling e₀) (unfoldHasReverse M.labeling e₀)
+      (unfoldedMarkedGraphNew M e₀ ha)) i = M.read i := by
+  letI : Quiver (UnfoldVertex (allArrowSource e₀)) :=
+    unfoldQuiver M.labeling e₀
+  letI : HasInvolutiveReverse (UnfoldVertex (allArrowSource e₀)) :=
+    unfoldHasReverse M.labeling e₀
+  have hbase :
+      (unfoldedMarkedGraph M e₀ ha).base = unfoldOld (allArrowSource e₀) := rfl
+  let oldLoop : @Quiver.Path (UnfoldVertex (allArrowSource e₀))
+      (unfoldQuiver M.labeling e₀)
+      (unfoldOld (allArrowSource e₀))
+      (unfoldOld (allArrowSource e₀)) :=
+    @Quiver.Path.cast (UnfoldVertex (allArrowSource e₀))
+      (unfoldQuiver M.labeling e₀)
+      (unfoldedMarkedGraph M e₀ ha).base
+      (unfoldedMarkedGraph M e₀ ha).base
+      (unfoldOld (allArrowSource e₀))
+      (unfoldOld (allArrowSource e₀)) hbase hbase
+      ((unfoldedMarkedGraph M e₀ ha).loops i)
+  have holdread :
+      (unfoldLabelling M.labeling e₀).pathRead
+          ((unfoldedMarkedGraph M e₀ ha).loops i) = M.read i := by
+    exact unfoldedMarkedGraph_read M e₀ ha i
+  change (unfoldLabelling M.labeling e₀).pathRead
+      ((unfoldSwitchNewOld M.labeling e₀).comp
+        (oldLoop.comp
+        (unfoldSwitchOldNew M.labeling e₀))) = M.read i
+  rw [BinaryLabelling.pathRead_comp, BinaryLabelling.pathRead_comp,
+    unfoldSwitchNewOld_read, BinaryLabelling.pathRead_cast,
+    holdread, unfoldSwitchOldNew_read]
+  simp
+
+theorem unfoldedMarkedGraphNew_isGenerating {n : ℕ}
+    (M : MarkedBinaryGraph (G := G) (H := H) (V := V) n)
+    (e₀ : AllArrow (V := V))
+    (ha : allArrowSource e₀ = M.base) (hgen : M.IsGenerating) :
+    (@MarkedBinaryGraph.IsGenerating n G H
+      (UnfoldVertex (allArrowSource e₀)) _ _
+      (unfoldQuiver M.labeling e₀) (unfoldHasReverse M.labeling e₀)
+      (unfoldedMarkedGraphNew M e₀ ha)) := by
+  change Subgroup.closure (Set.range (@MarkedBinaryGraph.read n G H
+    (UnfoldVertex (allArrowSource e₀)) _ _
+    (unfoldQuiver M.labeling e₀) (unfoldHasReverse M.labeling e₀)
+    (unfoldedMarkedGraphNew M e₀ ha))) = ⊤
+  have hread :
+      @MarkedBinaryGraph.read n G H (UnfoldVertex (allArrowSource e₀)) _ _
+        (unfoldQuiver M.labeling e₀) (unfoldHasReverse M.labeling e₀)
+        (unfoldedMarkedGraphNew M e₀ ha) = M.read := by
+    funext i
+    exact unfoldedMarkedGraphNew_read M e₀ ha i
+  rw [hread]
+  exact hgen
+
+theorem unfoldedMarkedGraphNew_weaklyConnected {n : ℕ}
+    (M : MarkedBinaryGraph (G := G) (H := H) (V := V) n)
+    (e₀ : AllArrow (V := V))
+    (ha : allArrowSource e₀ = M.base)
+    (hconn : M.WeaklyConnected) :
+    (@MarkedBinaryGraph.WeaklyConnected n G H
+      (UnfoldVertex (allArrowSource e₀)) _ _
+      (unfoldQuiver M.labeling e₀) (unfoldHasReverse M.labeling e₀)
+      (unfoldedMarkedGraphNew M e₀ ha)) := by
+  letI : Quiver (UnfoldVertex (allArrowSource e₀)) :=
+    unfoldQuiver M.labeling e₀
+  letI : HasInvolutiveReverse (UnfoldVertex (allArrowSource e₀)) :=
+    unfoldHasReverse M.labeling e₀
+  intro z
+  obtain ⟨p⟩ := unfoldedMarkedGraph_weaklyConnected M e₀ ha hconn z
+  refine ⟨?_⟩
+  exact (@Quiver.Symmetrify.of (UnfoldVertex (allArrowSource e₀))
+      (unfoldQuiver M.labeling e₀)).mapPath
+      (unfoldSwitchNewOld M.labeling e₀) |>.comp p
+
+theorem unfoldNew_ne_sourceAt_color
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V)) :
+    unfoldNew (allArrowSource e₀) ≠
+      unfoldVertexAt L (allArrowSource e₀) e₀
+        (allArrowSource e₀) (unfoldEdgeColor L e₀) := by
+  intro h
+  have hold :
+      unfoldVertexAt L (allArrowSource e₀) e₀
+          (allArrowSource e₀) (unfoldEdgeColor L e₀) =
+        unfoldOld (allArrowSource e₀) :=
+    (unfoldVertexAt_eq_old_iff L (allArrowSource e₀) e₀
+      (allArrowSource e₀) (unfoldEdgeColor L e₀)).mpr ⟨rfl, rfl⟩
+  exact unfoldNew_ne_old (allArrowSource e₀) (h.trans hold)
+
+theorem unfoldNew_ne_vertexAt_of_ne_source
+    (L : BinaryLabelling (G := G) (H := H) (V := V))
+    (e₀ : AllArrow (V := V)) {b : Symmetrify V}
+    (hb : (show V from b) ≠ allArrowSource e₀) :
+    unfoldNew (allArrowSource e₀) ≠
+      unfoldVertexAt L (allArrowSource e₀) e₀
+        (show V from b) (unfoldEdgeColor L e₀) := by
+  intro h
+  have h' : unfoldVertexAt L (allArrowSource e₀) e₀
+        (show V from b) (unfoldEdgeColor L e₀) =
+      unfoldNew (allArrowSource e₀) := h.symm
+  exact hb ((unfoldVertexAt_eq_new_iff L (allArrowSource e₀) e₀
+    (show V from b) (unfoldEdgeColor L e₀)).mp h').1
+
+/-! ### The source-unfold branch supplies a safe fold -/
+
+theorem exists_safe_fold_after_unfold {n : ℕ}
+    (M : MarkedBinaryGraph (G := G) (H := H) (V := V) n)
+    (e₀ : AllArrow (V := V))
+    (ha : allArrowSource e₀ = M.base)
+    {b : Symmetrify V}
+    (q : @Quiver.Path (Symmetrify V)
+      (@Quiver.symmetrifyQuiver V _) (show V from allArrowTarget e₀)
+      b)
+    (hb : (show V from b) ≠ allArrowSource e₀)
+    (hq : M.labeling.symmIsMonochromatic q
+      (unfoldEdgeColor M.labeling e₀))
+    (hread : M.labeling.symmPathRead q =
+      (separatedMap (allArrowLabel M.labeling e₀))⁻¹)
+    (hgen : M.IsGenerating) (hconn : M.WeaklyConnected) :
+    letI : Fintype (UnfoldVertex (allArrowSource e₀)) :=
+      unfoldVertexFintype (allArrowSource e₀)
+    letI : Quiver (UnfoldVertex (allArrowSource e₀)) :=
+      unfoldQuiver M.labeling e₀
+    letI : HasInvolutiveReverse (UnfoldVertex (allArrowSource e₀)) :=
+      unfoldHasReverse M.labeling e₀
+    letI (x y : UnfoldVertex (allArrowSource e₀)) : Fintype (x ⟶ y) :=
+      unfoldQuiverHomFintype M.labeling e₀ x y
+    ∃ e₁ : AllArrow,
+      ∃ ha₁ : allArrowSource e₁ = unfoldNew (allArrowSource e₀),
+        ∃ q₁ : @Quiver.Path
+          (Symmetrify (UnfoldVertex (allArrowSource e₀)))
+          (@Quiver.symmetrifyQuiver (UnfoldVertex (allArrowSource e₀))
+            (unfoldQuiver M.labeling e₀))
+          ((@Quiver.Symmetrify.of (UnfoldVertex (allArrowSource e₀))
+            (unfoldQuiver M.labeling e₀)).obj (allArrowTarget e₁))
+          ((@Quiver.Symmetrify.of (UnfoldVertex (allArrowSource e₀))
+            (unfoldQuiver M.labeling e₀)).obj
+            (unfoldVertexAt M.labeling (allArrowSource e₀) e₀
+              (show V from b) (unfoldEdgeColor M.labeling e₀))),
+          ∃ hq₁ : foldSymmPathAvoid (qV := unfoldQuiver M.labeling e₀)
+              e₁ q₁,
+            @MarkedBinaryGraph.IsGenerating n G H
+                (foldVertex (unfoldNew (allArrowSource e₀))
+                  (unfoldVertexAt M.labeling (allArrowSource e₀) e₀
+                    (show V from b) (unfoldEdgeColor M.labeling e₀)))
+                _ _ (foldQuiver e₁) (foldHasReverse e₁)
+                (foldedMarkedGraphSymm
+                  (unfoldedMarkedGraphNew M e₀ ha) e₁ ha₁ q₁ hq₁) ∧
+            @MarkedBinaryGraph.WeaklyConnected n G H
+                (foldVertex (unfoldNew (allArrowSource e₀))
+                  (unfoldVertexAt M.labeling (allArrowSource e₀) e₀
+                    (show V from b) (unfoldEdgeColor M.labeling e₀)))
+                _ _ (foldQuiver e₁) (foldHasReverse e₁)
+                (foldedMarkedGraphSymm
+                  (unfoldedMarkedGraphNew M e₀ ha) e₁ ha₁ q₁ hq₁) ∧
+            Fintype.card (foldVertex (unfoldNew (allArrowSource e₀))
+              (unfoldVertexAt M.labeling (allArrowSource e₀) e₀
+                (show V from b) (unfoldEdgeColor M.labeling e₀))) <
+              Fintype.card (UnfoldVertex (allArrowSource e₀)) := by
+  letI : Fintype (UnfoldVertex (allArrowSource e₀)) :=
+    unfoldVertexFintype (allArrowSource e₀)
+  letI : Quiver (UnfoldVertex (allArrowSource e₀)) :=
+    unfoldQuiver M.labeling e₀
+  letI : HasInvolutiveReverse (UnfoldVertex (allArrowSource e₀)) :=
+    unfoldHasReverse M.labeling e₀
+  letI (x y : UnfoldVertex (allArrowSource e₀)) : Fintype (x ⟶ y) :=
+    unfoldQuiverHomFintype M.labeling e₀ x y
+  let b₁ : UnfoldVertex (allArrowSource e₀) :=
+    unfoldVertexAt M.labeling (allArrowSource e₀) e₀
+      (show V from b) (unfoldEdgeColor M.labeling e₀)
+  let p₀ := unfoldDuplicateFoldPath M.labeling e₀ q hq
+  let hp : @Quiver.Path (Symmetrify (UnfoldVertex (allArrowSource e₀)))
+      (@Quiver.symmetrifyQuiver (UnfoldVertex (allArrowSource e₀))
+        (unfoldQuiver M.labeling e₀))
+      (unfoldNew (allArrowSource e₀))
+      ((@Quiver.Symmetrify.of (UnfoldVertex (allArrowSource e₀))
+        (unfoldQuiver M.labeling e₀)).obj b₁) := by
+    exact p₀
+  have hpread :
+      (unfoldLabelling M.labeling e₀).symmPathRead hp = 1 := by
+    dsimp [hp, p₀, b₁]
+    exact (unfold_duplicate_safe_tail M.labeling e₀ q hq hread).2
+  have hdecomp : ∃ c : Symmetrify (UnfoldVertex (allArrowSource e₀)),
+      ∃ e : @Quiver.Hom (Symmetrify (UnfoldVertex (allArrowSource e₀)))
+        (@Quiver.symmetrifyQuiver (UnfoldVertex (allArrowSource e₀))
+          (unfoldQuiver M.labeling e₀))
+        (show Symmetrify (UnfoldVertex (allArrowSource e₀)) from
+          unfoldNew (allArrowSource e₀)) c,
+      ∃ q₁ : @Quiver.Path
+        (Symmetrify (UnfoldVertex (allArrowSource e₀)))
+        (@Quiver.symmetrifyQuiver (UnfoldVertex (allArrowSource e₀))
+          (unfoldQuiver M.labeling e₀)) c
+        (show Symmetrify (UnfoldVertex (allArrowSource e₀)) from b₁),
+        hp = e.toPath.comp q₁ ∧ foldSymmPathAvoid (symmOrientedArrow e) q₁ := by
+    let eD : @Quiver.Hom
+        (Symmetrify (UnfoldVertex (allArrowSource e₀)))
+        (@Quiver.symmetrifyQuiver (UnfoldVertex (allArrowSource e₀))
+          (unfoldQuiver M.labeling e₀))
+        (unfoldNew (allArrowSource e₀))
+        (unfoldVertexAt M.labeling (allArrowSource e₀) e₀
+          (allArrowTarget e₀) (unfoldEdgeColor M.labeling e₀)) :=
+      Sum.inl (unfoldDuplicateForward M.labeling e₀)
+    let q₁ := (@Quiver.Symmetrify.of (UnfoldVertex (allArrowSource e₀))
+      (unfoldQuiver M.labeling e₀)).mapPath
+      (unfoldSymmMonochromaticPath M.labeling e₀
+        (unfoldEdgeColor M.labeling e₀) q hq)
+    refine ⟨_, eD, q₁, ?_, ?_⟩
+    · change unfoldDuplicateFoldPath M.labeling e₀ q hq =
+        eD.toPath.comp q₁
+      rfl
+    · exact (unfold_duplicate_safe_tail M.labeling e₀ q hq hread).1
+  have hgen' :
+      (@MarkedBinaryGraph.IsGenerating n G H
+        (UnfoldVertex (allArrowSource e₀)) _ _
+        (unfoldQuiver M.labeling e₀) (unfoldHasReverse M.labeling e₀)
+        (unfoldedMarkedGraphNew M e₀ ha)) :=
+    unfoldedMarkedGraphNew_isGenerating M e₀ ha hgen
+  have hconn' :
+      (@MarkedBinaryGraph.WeaklyConnected n G H
+        (UnfoldVertex (allArrowSource e₀)) _ _
+        (unfoldQuiver M.labeling e₀) (unfoldHasReverse M.labeling e₀)
+        (unfoldedMarkedGraphNew M e₀ ha)) :=
+    unfoldedMarkedGraphNew_weaklyConnected M e₀ ha hconn
+  obtain ⟨e₁, ha₁, q₁, hq₁, hgen₁, hconn₁, hcard₁⟩ :=
+    exists_safe_folded_marked_graph
+      (M := unfoldedMarkedGraphNew M e₀ ha)
+      (a := unfoldNew (allArrowSource e₀)) (b := b₁)
+      (unfoldNew_ne_vertexAt_of_ne_source M.labeling e₀ hb) hp hpread hdecomp
+      hgen' hconn'
+  exact ⟨e₁, ha₁, q₁, hq₁, hgen₁, hconn₁, hcard₁⟩
+
 end GeneralGrushko
 end MarshallHall
