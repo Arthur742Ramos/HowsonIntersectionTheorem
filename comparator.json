@@ -2,6 +2,7 @@
   "challenge_module": "Challenge",
   "solution_module": "Solution",
   "theorem_names": [
+    "MarshallHall.marshallHall",
     "rank_freeProduct_eq_add"
   ],
   "definition_names": [],

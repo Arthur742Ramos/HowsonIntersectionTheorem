@@ -109,6 +109,7 @@ status:
       file: "MarshallHall/Hall.lean"
       sorry_count: 0
       axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
     - declaration: "MarshallHall.rank_binaryFreeProduct"
       file: "MarshallHall/Grushko.lean"
       sorry_count: 0
@@ -143,13 +144,14 @@ automation:
 
 fidelity:
   divergences: >-
-    The public Challenge now selects the arbitrary-factor binary
-    Grushko--Neumann equality rather than the previously registered LERF
-    corollary. The Hall free-factor theorem and the finite-indexed free-group
-    rank calculation remain additional proved library results. The finite
-    cover in the Hall construction is encoded as a finite permutation action
-    on a set of left-coset states; the binary arbitrary-factor rank theorem is
-    proved by the finite graph reduction in `MarshallHall/GrushkoFull.lean`.
+    The public Challenge now selects both the strengthened inclusion-compatible
+    Hall free-factor theorem and the arbitrary-factor binary Grushko--Neumann
+    equality rather than the previously registered LERF corollary. The
+    finite-indexed free-group rank calculation and the LERF separator remain
+    additional proved library results. The finite cover in the Hall
+    construction is encoded as a finite permutation action on a set of
+    left-coset states; the binary arbitrary-factor rank theorem is proved by
+    the finite graph reduction in `MarshallHall/GrushkoFull.lean`.
 
 review:
   status: "self-assessed"
@@ -162,8 +164,8 @@ review:
     suffix-state construction, permutation completion, basepoint stabilizer,
     finite-index argument, subgroup containment, free-factor retraction, rank
     calculations, and arbitrary-factor graph reduction are checked by Lean's
-    kernel; the pinned Comparator replay checks the selected Grushko
-    Challenge/Solution correspondence independently.
+    kernel; the pinned Comparator replay checks both selected
+    Challenge/Solution correspondences independently.
 
 alignment:
   namespace: ""
@@ -177,7 +179,7 @@ alignment:
       lean: "MarshallHall.marshallHall"
       module: "MarshallHall/Hall.lean"
       status: "proved"
-      note: "The witness records K, H ≤ K, nonzero index, a complement, and the actual subgroup inclusion under the coproduct equivalence."
+      note: "One of the two new Palomar-selected results: the witness records K, H ≤ K, nonzero index, a complement, and the actual subgroup inclusion under the coproduct equivalence."
     - source: "B. H. Neumann, On the Number of Generators of a Free Product"
       lean: "MarshallHall.rank_binaryFreeProduct"
       module: "MarshallHall/Grushko.lean"
@@ -192,7 +194,7 @@ alignment:
       lean: "MarshallHall.rank_freeProduct_eq_add"
       module: "MarshallHall.lean"
       status: "proved"
-      note: "This is the new Palomar-selected result: the rank of a free product of arbitrary finitely generated groups is the sum of the factor ranks, obtained by a kernel-checked finite labelled-graph reduction including source-unfold and monochromatic-vertex contraction cases."
+      note: "The second new Palomar-selected result: the rank of a free product of arbitrary finitely generated groups is the sum of the factor ranks, obtained by a kernel-checked finite labelled-graph reduction including source-unfold and monochromatic-vertex contraction cases."
     - source: "Stallings finite-core method"
       lean: "MarshallHall.freeGroup_subgroup_separable_proved"
       module: "MarshallHall/Separation.lean"

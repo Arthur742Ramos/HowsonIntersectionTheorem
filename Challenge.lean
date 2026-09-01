@@ -1,5 +1,6 @@
 import Mathlib.GroupTheory.Coprod.Basic
 import Mathlib.GroupTheory.Finiteness
+import Mathlib.GroupTheory.Index
 import Mathlib.GroupTheory.Rank
 
 noncomputable section
@@ -12,6 +13,22 @@ universe u
 namespace MarshallHall
 
 variable {G H : Type*} [Group G] [Group H]
+
+structure MarshallHallWitness {F : Type u} [Group F] (H : Subgroup F) where
+  K : Subgroup F
+  hHK : H ≤ K
+  finiteIndex : K.index ≠ 0
+  complement : Type u
+  [complementGroup : Group complement]
+  equiv : H ∗ complement ≃* K
+  inclusion : ∀ h : H, equiv (Monoid.Coprod.inl h) = ⟨h.1, hHK h.2⟩
+
+theorem marshallHall
+    {α : Type u} [finite : Finite α]
+    (H : Subgroup (FreeGroup α))
+    [fg : Group.FG H] :
+    Nonempty (MarshallHallWitness H) := by
+  sorry
 
 namespace GeneralGrushko
 

@@ -347,9 +347,9 @@ the identity coset; the generating-set states make the subgroup loops lie in
 the finite core. -/
 
 theorem marshallHall
-    {α : Type*} [Finite α]
+    {α : Type u} [finite : Finite α]
     (H : Subgroup (FreeGroup α))
-    [Group.FG H] :
+    [fg : Group.FG H] :
     Nonempty (MarshallHallWitness H) := by
   classical
   letI : DecidableEq α := Classical.decEq α
