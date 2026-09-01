@@ -116,8 +116,31 @@ generator-reduction theorem yet.
 - `MarshallHall/GrushkoFold.lean` adds the next fold-proof invariant: an
   explicit `List.splitBy` decomposition into maximal monochromatic runs, with
   a certified proof that a nonempty null-labelled word contains a null
-  monochromatic run.  The actual graph fold/unfold construction and its
-  termination theorem remain the next substantive step.
+  monochromatic run.
+- `MarshallHall/GrushkoGraph.lean` gives the graph-facing path semantics: an
+  oriented-edge labelling reads composition as multiplication and reversal as
+  inversion, and path-level Nielsen moves are proved to induce the actual
+  algebraic Nielsen moves on the tuple of labels.  It is the interface the
+  remaining fold construction will consume.
+- `MarshallHall/GrushkoRose.lean` constructs the finite subdivided rose for a
+  tuple of reduced factor words.  Its marked loops read exactly the tuple,
+  the vertex type is finite, and the underlying symmetrized graph is proved
+  weakly connected.  This is the certified initial graph for the fold
+  induction.
+- `MarshallHall/GrushkoInvariant.lean` proves the exact Euler-characteristic
+  bound for the initial rose and shows that a safe fold preserves the bound
+  while strictly reducing the finite vertex set.
+- `MarshallHall/GrushkoUnfold.lean` formalizes the finite source-unfold move
+  used in the unsafe edge-reuse case.  It constructs the duplicated edge and
+  compatible reversal/labels, proves the exact vertex and oriented-edge
+  cardinal changes, preserves the Euler bound, and proves that the old copy
+  is monochromatic.  The remaining step is to connect this local move to the
+  marking-preserving monochromatic-vertex removal and close the unsafe branch.
+- `MarshallHall/GrushkoReductionChain.lean` packages the global strong
+  induction from safe folds to separated generators.  Its remaining
+  hypothesis is deliberately explicit: the source-unfold layer is now
+  certified, but the marking-preserving monochromatic-vertex removal still
+  needs to be connected to the induction.
 - `comparator.json` records the exact Challenge/Solution correspondence.
 - `formalization.yaml` records provenance, scope, and the deliberate boundary
   between the full Hall result and the free-group Grushko instance.

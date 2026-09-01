@@ -2,6 +2,13 @@ import MarshallHall.Hall
 import MarshallHall.GrushkoGeneral
 import MarshallHall.GrushkoReduction
 import MarshallHall.GrushkoFold
+import MarshallHall.GrushkoGraph
+import MarshallHall.GrushkoFoldStep
+import MarshallHall.GrushkoRose
+import MarshallHall.GrushkoEdge
+import MarshallHall.GrushkoUnfold
+import MarshallHall.GrushkoInvariant
+import MarshallHall.GrushkoReductionChain
 
 /-!
 # Marshall Hall's theorem through finite cores

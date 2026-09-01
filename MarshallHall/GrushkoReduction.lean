@@ -167,6 +167,31 @@ theorem binaryToIndexed_factorWordProd (u : List (Sum G H)) :
       cases a <;>
         simp [factorWordProd, separatedMap, binaryLetterToIndexed, ih]
 
+/-! Reversing an oriented labelled path reverses the order and inverts every
+label.  This is the algebraic operation used by the graph-fold bookkeeping. -/
+def factorWordInv : Sum G H → Sum G H
+  | Sum.inl g => Sum.inl g⁻¹
+  | Sum.inr h => Sum.inr h⁻¹
+
+@[simp] theorem factorWordInv_factorWordInv (a : Sum G H) :
+    factorWordInv (factorWordInv (G := G) (H := H) a) = a := by
+  cases a <;> simp [factorWordInv]
+
+@[simp] theorem separatedMap_factorWordInv (a : Sum G H) :
+    separatedMap (factorWordInv (G := G) (H := H) a) =
+      (separatedMap (G := G) (H := H) a)⁻¹ := by
+  cases a <;> rfl
+
+theorem factorWordProd_reverse_inv (u : List (Sum G H)) :
+    factorWordProd (G := G) (H := H)
+        (u.reverse.map (factorWordInv (G := G) (H := H))) =
+      (factorWordProd (G := G) (H := H) u)⁻¹ := by
+  induction u with
+  | nil => simp [factorWordProd]
+  | cons a u ih =>
+      rw [List.reverse_cons, List.map_append, factorWordProd_append, ih]
+      simp [factorWordProd, separatedMap_factorWordInv, mul_inv_rev]
+
 theorem word_length_rcons_le {b : Bool}
     (p : Monoid.CoprodI.Word.Pair (binaryFamily G H) b) :
     (Monoid.CoprodI.Word.rcons p).toList.length ≤ p.tail.toList.length + 1 := by
@@ -357,6 +382,11 @@ def binarySumIndex : Sum G H → Bool
 
 @[simp] theorem binarySumIndex_inr (h : H) :
     binarySumIndex (G := G) (H := H) (Sum.inr h) = true := rfl
+
+@[simp] theorem binarySumIndex_factorWordInv (a : Sum G H) :
+    binarySumIndex (factorWordInv (G := G) (H := H) a) =
+      binarySumIndex a := by
+  cases a <;> rfl
 
 @[simp] theorem binarySumIndex_sigma (z : Sigma (binaryFamily G H)) :
     binarySumIndex (G := G) (H := H) (binarySigmaToSum z) = z.1 := by
@@ -937,6 +967,56 @@ theorem nielsenEquivalent_mulRight_inv {A : Type*} [Group A] {n : ℕ}
   rw [← hw]
   exact hxyzw
 
+theorem nielsenEquivalent_symm {A : Type*} [Group A] {n : ℕ}
+    {x y : Fin n → A} (h : NielsenEquivalent x y) :
+    NielsenEquivalent y x := by
+  have step_symm : ∀ {u v : Fin n → A}, NielsenStep u v →
+      NielsenEquivalent v u := by
+    intro u v hstep
+    cases hstep with
+    | perm e hEq =>
+        subst v
+        apply Relation.ReflTransGen.single
+        apply NielsenStep.perm e.symm
+        funext i
+        simp [Function.comp_apply]
+    | invert i hEq =>
+        subst v
+        apply Relation.ReflTransGen.single
+        apply NielsenStep.invert i
+        funext k
+        by_cases hki : k = i
+        · subst k
+          simp
+        · simp [hki]
+    | mulRight i j hij hEq =>
+        have hback := nielsenEquivalent_mulRight_inv v i j hij
+        have hEqBack : Function.update v i (v i * (v j)⁻¹) = u := by
+          rw [hEq]
+          funext k
+          by_cases hki : k = i
+          · subst k
+            simp [hij, hij.symm]
+          · by_cases hkj : k = j
+            · subst k
+              simp [hki, hij, hij.symm]
+            · simp [hEq, hki, hkj]
+        rw [hEqBack] at hback
+        exact hback
+  induction h using Relation.ReflTransGen.trans_induction_on with
+  | refl => exact Relation.ReflTransGen.refl
+  | single hstep => exact step_symm hstep
+  | trans h₁ h₂ ih₁ ih₂ => exact Relation.ReflTransGen.trans ih₂ ih₁
+
+theorem nielsenEquivalent_refl {A : Type*} [Group A] {n : ℕ}
+    (x : Fin n → A) : NielsenEquivalent x x :=
+  Relation.ReflTransGen.refl
+
+theorem nielsenEquivalent_trans {A : Type*} [Group A] {n : ℕ}
+    {x y z : Fin n → A} (hxy : NielsenEquivalent x y)
+    (hyz : NielsenEquivalent y z) : NielsenEquivalent x z :=
+  Relation.ReflTransGen.trans hxy hyz
+
 theorem nielsenEquivalent_mulLeft {A : Type*} [Group A] {n : ℕ}
     (x : Fin n → A) (i j : Fin n) (hij : i ≠ j) :
     NielsenEquivalent x (Function.update x i (x j * x i)) := by
@@ -970,6 +1050,29 @@ theorem nielsenEquivalent_mulLeft {A : Type*} [Group A] {n : ℕ}
       · simp [r, q, w, z, y, hki, hkj, hij]
   rw [← hr]
   exact hxyzwqr
+
+/-! A conjugation of one entry by another is a composite of elementary moves.
+This is the tuple operation used when changing the base point of a folded
+graph. -/
+theorem nielsenEquivalent_conjugate {A : Type*} [Group A] {n : ℕ}
+    (x : Fin n → A) (i j : Fin n) (hij : i ≠ j) :
+    NielsenEquivalent x
+      (Function.update x i (x j * x i * (x j)⁻¹)) := by
+  let y := Function.update x i (x j * x i)
+  have hxy : NielsenEquivalent x y := nielsenEquivalent_mulLeft x i j hij
+  have hyz : NielsenEquivalent y
+      (Function.update y i (y i * (y j)⁻¹)) :=
+    nielsenEquivalent_mulRight_inv y i j hij
+  have hxyz := nielsenEquivalent_trans hxy hyz
+  have hEq : Function.update y i (y i * (y j)⁻¹) =
+      Function.update x i (x j * x i * (x j)⁻¹) := by
+    funext k
+    by_cases hki : k = i
+    · subst k
+      simp [y, hij, hij.symm, mul_assoc]
+    · simp [y, hki, hij]
+  rw [hEq] at hxyz
+  exact hxyz
 
 theorem nielsenMinimal_tupleFactorLength_le_mulRight_inv {n : ℕ}
     {x : Fin n → G ∗ H} (hmin : NielsenMinimal x)
