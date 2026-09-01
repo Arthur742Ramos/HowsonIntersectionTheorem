@@ -113,6 +113,11 @@ generator-reduction theorem yet.
 - `MarshallHall/GrushkoReduction.lean` supplies the checked binary normal-form
   bridge, alternating-word identity criterion, and Nielsen-minimality calculus
   needed by the remaining global fold/reduction theorem.
+- `MarshallHall/GrushkoFold.lean` adds the next fold-proof invariant: an
+  explicit `List.splitBy` decomposition into maximal monochromatic runs, with
+  a certified proof that a nonempty null-labelled word contains a null
+  monochromatic run.  The actual graph fold/unfold construction and its
+  termination theorem remain the next substantive step.
 - `comparator.json` records the exact Challenge/Solution correspondence.
 - `formalization.yaml` records provenance, scope, and the deliberate boundary
   between the full Hall result and the free-group Grushko instance.
