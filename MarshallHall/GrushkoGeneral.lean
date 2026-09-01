@@ -429,6 +429,116 @@ theorem rank_coprodI_freeGroup {ι : Type*} [Fintype ι] (α : ι → Type*)
   rw [rank_freeGroup_finite]
   simp
 
+/-! ### A finite-word length for the binary free product
+
+The next step in the arbitrary-factor theorem is a reduction of a finite
+generating tuple.  This gives the reduction argument an honest complexity
+measure without committing to a particular normal-form implementation.  A
+word is a list of tagged factor elements, and its length is the least length
+of a word representing the given free-product element.  The elementary
+calculus below is enough for induction on reductions: words concatenate,
+factor elements have length at most one, and multiplication is subadditive.
+-/
+
+/-- Evaluation of a finite alternating-free word in the binary free product.
+The list is not required to be reduced; `factorWordLength` takes the minimum
+over all such representatives. -/
+def factorWordProd : List (Sum G H) → G ∗ H
+  | [] => 1
+  | x :: xs => separatedMap x * factorWordProd xs
+
+theorem factorWordProd_append (u v : List (Sum G H)) :
+    factorWordProd (u ++ v) = factorWordProd u * factorWordProd v := by
+  induction u with
+  | nil => simp [factorWordProd]
+  | cons x u ih =>
+      simp only [List.cons_append, factorWordProd]
+      rw [ih, mul_assoc]
+
+theorem factorWordProd_surjective :
+    Function.Surjective (factorWordProd (G := G) (H := H)) := by
+  intro x
+  induction x using Monoid.Coprod.induction_on' with
+  | one => exact ⟨[], rfl⟩
+  | inl_mul g x ih =>
+      obtain ⟨u, hu⟩ := ih
+      refine ⟨Sum.inl g :: u, ?_⟩
+      simp [factorWordProd, separatedMap, hu]
+  | inr_mul h x ih =>
+      obtain ⟨u, hu⟩ := ih
+      refine ⟨Sum.inr h :: u, ?_⟩
+      simp [factorWordProd, separatedMap, hu]
+
+def factorWordRepresented (x : G ∗ H) (n : ℕ) : Prop :=
+  ∃ u : List (Sum G H), u.length = n ∧ factorWordProd u = x
+
+theorem factorWordRepresented_exists (x : G ∗ H) :
+    ∃ n, factorWordRepresented x n := by
+  obtain ⟨u, hu⟩ := factorWordProd_surjective x
+  exact ⟨u.length, u, rfl, hu⟩
+
+/-- The least number of factor letters needed to represent an element. -/
+noncomputable def factorWordLength (x : G ∗ H) : ℕ :=
+  by
+    classical
+    exact Nat.find (factorWordRepresented_exists x)
+
+theorem factorWordLength_spec (x : G ∗ H) :
+    factorWordRepresented x (factorWordLength x) := by
+  classical
+  exact Nat.find_spec (factorWordRepresented_exists x)
+
+theorem factorWordLength_wordProd_le (u : List (Sum G H)) :
+    factorWordLength (factorWordProd u) ≤ u.length := by
+  classical
+  exact Nat.find_min' (factorWordRepresented_exists (factorWordProd u)) ⟨u, rfl, rfl⟩
+
+@[simp] theorem factorWordLength_one :
+    factorWordLength (1 : G ∗ H) = 0 := by
+  classical
+  apply Nat.eq_zero_of_le_zero
+  simpa [factorWordProd] using
+    (factorWordLength_wordProd_le (G := G) (H := H) ([] : List (Sum G H)))
+
+@[simp] theorem factorWordLength_eq_zero_iff {x : G ∗ H} :
+    factorWordLength x = 0 ↔ x = 1 := by
+  classical
+  constructor
+  · intro hx
+    obtain ⟨u, hu, hux⟩ := factorWordLength_spec x
+    have hu0 : u = [] := by
+      cases u with
+      | nil => rfl
+      | cons a u => simp_all
+    rw [hu0] at hux
+    simpa [factorWordProd] using hux.symm
+  · rintro rfl
+    exact factorWordLength_one
+
+theorem factorWordLength_mul_le (x y : G ∗ H) :
+    factorWordLength (x * y) ≤ factorWordLength x + factorWordLength y := by
+  classical
+  obtain ⟨u, hu, hux⟩ := factorWordLength_spec x
+  obtain ⟨v, hv, hvy⟩ := factorWordLength_spec y
+  have huv : factorWordRepresented (x * y) (u.length + v.length) := by
+    refine ⟨u ++ v, by simp [hu, hv], ?_⟩
+    rw [factorWordProd_append, hux, hvy]
+  have hle := Nat.find_min' (factorWordRepresented_exists (x * y)) huv
+  rw [← hu, ← hv]
+  exact hle
+
+theorem factorWordLength_inl_le_one (g : G) :
+    factorWordLength (inl g : G ∗ H) ≤ 1 := by
+  classical
+  exact Nat.find_min' (factorWordRepresented_exists (inl g))
+    ⟨[Sum.inl g], rfl, by simp [factorWordProd, separatedMap]⟩
+
+theorem factorWordLength_inr_le_one (h : H) :
+    factorWordLength (inr h : G ∗ H) ≤ 1 := by
+  classical
+  exact Nat.find_min' (factorWordRepresented_exists (inr h))
+    ⟨[Sum.inr h], rfl, by simp [factorWordProd, separatedMap]⟩
+
 end GeneralGrushko
 
 end MarshallHall

@@ -1,5 +1,6 @@
 import MarshallHall.Hall
 import MarshallHall.GrushkoGeneral
+import MarshallHall.GrushkoReduction
 
 /-!
 # Marshall Hall's theorem through finite cores

@@ -110,6 +110,9 @@ generator-reduction theorem yet.
 - `MarshallHall/GrushkoGeneral.lean` proves finite-family free-group rank,
   the factorwise bounds for arbitrary factors, and the exact bridge from
   separated generators to the full Grushko equality.
+- `MarshallHall/GrushkoReduction.lean` supplies the checked binary normal-form
+  bridge, alternating-word identity criterion, and Nielsen-minimality calculus
+  needed by the remaining global fold/reduction theorem.
 - `comparator.json` records the exact Challenge/Solution correspondence.
 - `formalization.yaml` records provenance, scope, and the deliberate boundary
   between the full Hall result and the free-group Grushko instance.
