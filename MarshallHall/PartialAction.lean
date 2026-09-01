@@ -58,6 +58,27 @@ def leftMulEquiv (H : Subgroup G) (a : G) :
 theorem leftMulEquiv_mk (H : Subgroup G) (a x : G) :
     leftMulEquiv H a (Quotient.mk'' x) = Quotient.mk'' (a * x) := rfl
 
+@[simp]
+theorem leftMulEquiv_one (H : Subgroup G) (x : LeftCosetQuotient H) :
+    leftMulEquiv H 1 x = x := by
+  refine Quotient.inductionOn x ?_
+  intro x
+  simp [leftMulEquiv, leftMul]
+
+theorem leftMulEquiv_mul (H : Subgroup G) (a b : G)
+    (x : LeftCosetQuotient H) :
+    leftMulEquiv H (a * b) x =
+      leftMulEquiv H a (leftMulEquiv H b x) := by
+  refine Quotient.inductionOn x ?_
+  intro x
+  simp [leftMulEquiv, leftMul, mul_assoc]
+
+theorem leftMulEquiv_inv_apply (H : Subgroup G) (a : G)
+    (x : LeftCosetQuotient H) :
+    leftMulEquiv H a⁻¹ (leftMulEquiv H a x) = x := by
+  have h := (leftMulEquiv H a).symm_apply_apply x
+  simpa [leftMulEquiv] using h
+
 theorem leftCoset_mk_eq_one_iff (H : Subgroup G) (x : G) :
     (Quotient.mk'' x : LeftCosetQuotient H) = Quotient.mk'' (1 : G) ↔ x ∈ H := by
   constructor

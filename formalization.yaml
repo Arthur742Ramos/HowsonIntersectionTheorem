@@ -2,15 +2,16 @@
 version: "v0.4"
 
 project:
-  name: "Finite-core separation for free groups"
+  name: "Marshall Hall's theorem through finite cores"
   description: >-
-    Formalizes the subgroup-separability (LERF) consequence of Marshall
-    Hall's theorem for finitely generated subgroups of finitely generated
-    free groups. The proof extracts the finitely many suffix states of a
-    subgroup generating set and a separating word, completes the resulting
-    partial generator actions to permutations of a finite state set, and
-    takes the stabilizer of the base state. This is the finite-state form of
-    the Stallings core-completion argument.
+    Formalizes Marshall Hall's finite-index free-factor theorem for finitely
+    generated subgroups of finite-rank free groups. The proof extracts the
+    finitely many suffix states of a subgroup generating set, completes the
+    resulting partial generator actions to permutations of a finite state
+    set, identifies the connected orbit with a finite core, and extends a
+    geodesic spanning tree to obtain an inclusion-compatible free-product
+    decomposition. The repository also proves the binary free-group instance
+    of Grushko--Neumann rank additivity and the LERF consequence.
   authors:
     - "Arthur Freitas Ramos"
   license: "Apache-2.0"
@@ -31,8 +32,8 @@ sources:
     id: "10.4153/CJM-1949-017-2"
     type: "article"
     location: "https://doi.org/10.4153/CJM-1949-017-2"
-    relationship: "adapts"
-    note: "Classical source for the finite-index extension theorem; this repository formalizes its subgroup-separability consequence rather than claiming the full free-factor conclusion."
+    relationship: "formalizes"
+    note: "Classical source for the finite-index extension theorem; the library proves the free-factor conclusion with an explicit inclusion-compatible coproduct witness, together with its LERF consequence."
     license: "unknown"
     author_endorsement: "not-contacted"
   - title: "Topology of finite graphs"
@@ -56,6 +57,16 @@ sources:
     note: "Combinatorial and computational treatment of Stallings foldings; it motivates the finite-core viewpoint, while this repository proves the stated separator by finite permutation completion."
     license: "unknown"
     author_endorsement: "not-contacted"
+  - title: "On the Number of Generators of a Free Product"
+    authors:
+      - "B. H. Neumann"
+    id: "10.1112/jlms/s1-18.1.12"
+    type: "article"
+    location: "Journal of the London Mathematical Society 18(1), 12--20 (1943)"
+    relationship: "formalizes"
+    note: "Classical source for the Grushko--Neumann rank-additivity theorem; this repository formalizes the finite-rank free-group instance via an explicit free-product equivalence and an abelianization lower bound."
+    license: "unknown"
+    author_endorsement: "not-contacted"
 
 related_formalizations:
   - id: "https://github.com/leanprover-community/mathlib4/blob/v4.32.0/Mathlib/GroupTheory/FreeGroup/NielsenSchreier.lean"
@@ -76,19 +87,26 @@ related_formalizations:
 
 status:
   scope: >-
-    The headline theorem covers every finite generating type alpha, every
-    finitely generated subgroup H of FreeGroup alpha, and every element g not
-    in H. It produces a subgroup K containing H with nonzero natural-number
-    index and excluding g. The implementation proves this by a finite
-    permutation action built from all suffix states of finite generators and
-    the separating word. This is precisely the subgroup-separability/LERF
-    consequence of Marshall Hall's theorem. The stronger free-factor
-    conclusion (that H is a free factor of K) is intentionally not claimed
-    by this first submission and is the next formalization layer.
+    The main Hall theorem covers every finite generating type alpha and every
+    finitely generated subgroup H of FreeGroup alpha. It produces a subgroup
+    K containing H with nonzero natural-number index, a complement, and a
+    multiplicative equivalence H * complement ≃* K whose left injection is the
+    actual inclusion of H. The same finite-state engine yields the LERF
+    separator for any element outside H. The rank result covers binary free
+    products of free groups on finite types; arbitrary finitely generated
+    free factors remain outside the formalized Grushko scope.
   sorry_count: 0
   sorry_in_definitions: 0
   axioms: ["propext", "Classical.choice", "Quot.sound"]
   main_results:
+    - declaration: "MarshallHall.marshallHall"
+      file: "MarshallHall/Hall.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+    - declaration: "MarshallHall.rank_binaryFreeProduct"
+      file: "MarshallHall/Grushko.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
     - declaration: "freeGroup_subgroup_separable"
       file: "Solution.lean"
       sorry_count: 0
@@ -111,14 +129,15 @@ automation:
 
 fidelity:
   divergences: >-
-    The public theorem states the subgroup-separability consequence rather than
-    the stronger free-factor conclusion of the full Marshall Hall theorem.
-    The formal index condition is `K.index ≠ 0`, matching Mathlib's convention
-    that an infinite-index subgroup has index zero. The finite cover is encoded
-    as a finite permutation action on a set of left-coset states; each partial
-    generator action is completed by an equivalence extension. The proof does
-    not claim a full topological classification of covers or a separately
-    formalized Stallings folding algorithm.
+    The registered public Challenge remains the compact subgroup-separability
+    statement, while the library additionally proves the stronger Hall
+    free-factor theorem. The formal index condition is `K.index ≠ 0`, matching
+    Mathlib's convention that an infinite-index subgroup has index zero. The
+    finite cover is encoded as a finite permutation action on a set of
+    left-coset states; each partial generator action is completed by an
+    equivalence extension. The Grushko result is explicitly restricted to
+    free factors that are themselves free groups on finite types; it does not
+    claim the general arbitrary-factor theorem.
 
 review:
   status: "self-assessed"
@@ -129,9 +148,9 @@ review:
     proof hole excluded from the status counts. The Solution and implementation
     library contain no proof holes or nonstandard axioms. The finite
     suffix-state construction, permutation completion, basepoint stabilizer,
-    finite-index argument, containment of H, and exclusion of g are checked by
-    Lean's kernel; the pinned Comparator replay checks the Challenge/Solution
-    correspondence independently.
+    finite-index argument, subgroup containment, free-factor retraction, and
+    rank calculation are checked by Lean's kernel; the pinned Comparator replay
+    checks the Challenge/Solution correspondence independently.
 
 alignment:
   namespace: ""
@@ -140,7 +159,17 @@ alignment:
       lean: "freeGroup_subgroup_separable"
       module: "Solution.lean"
       status: "proved"
-      note: "For a finitely generated subgroup H and g outside H, a finite-index subgroup K contains H and excludes g."
+      note: "For a finitely generated subgroup H, the library constructs a finite-index K containing H with an explicit inclusion-compatible free-factor decomposition; the registered surface exposes the LERF corollary for g outside H."
+    - source: "Marshall Hall, Subgroups of Finite Index in Free Groups"
+      lean: "MarshallHall.marshallHall"
+      module: "MarshallHall/Hall.lean"
+      status: "proved"
+      note: "The witness records K, H ≤ K, nonzero index, a complement, and the actual subgroup inclusion under the coproduct equivalence."
+    - source: "B. H. Neumann, On the Number of Generators of a Free Product"
+      lean: "MarshallHall.rank_binaryFreeProduct"
+      module: "MarshallHall/Grushko.lean"
+      status: "proved"
+      note: "Binary rank additivity is formalized for free groups on finite types; the lower bound is certified through free abelianization."
     - source: "Stallings finite-core method"
       lean: "MarshallHall.freeGroup_subgroup_separable_proved"
       module: "MarshallHall/Separation.lean"

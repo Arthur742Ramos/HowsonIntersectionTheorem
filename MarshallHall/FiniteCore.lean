@@ -152,4 +152,42 @@ theorem mem_corePoints_of_separating_suffix [DecidableEq (FreeGroup α)]
   exact mem_corePoints_of_separating
     (allActionStates_tail_mem g.toWord u hu x hx)
 
+theorem exists_wordValue_of_mem_actionStates (u : List (α × Bool))
+    {x : FreeGroup α} (hx : x ∈ actionStates u) :
+    ∃ v ∈ List.tails u, x = wordValue v := by
+  induction u with
+  | nil =>
+      refine ⟨[], ?_, ?_⟩
+      · simp [List.tails]
+      · simpa [actionStates, wordValue] using hx
+  | cons y u ih =>
+      simp only [actionStates_cons, List.mem_append, List.mem_singleton] at hx
+      rcases hx with hx | hx
+      · obtain ⟨v, hv, hvx⟩ := ih hx
+        refine ⟨v, ?_, hvx⟩
+        simp only [List.tails, List.mem_cons]
+        exact Or.inr hv
+      · refine ⟨y :: u, ?_, ?_⟩
+        · simp [List.tails]
+        · simpa [wordValue] using hx
+
+theorem exists_wordValue_of_mem_allActionStates (u : List (α × Bool))
+    {x : FreeGroup α} (hx : x ∈ allActionStates u) :
+    ∃ v ∈ List.tails u, x = wordValue v := by
+  induction u with
+  | nil =>
+      refine ⟨[], ?_, ?_⟩
+      · simp [List.tails]
+      · simpa [allActionStates, actionStates, wordValue] using hx
+  | cons y u ih =>
+      simp only [allActionStates, Finset.mem_union] at hx
+      rcases hx with hx | hx
+      · obtain ⟨v, hv, hvx⟩ := ih hx
+        refine ⟨v, ?_, hvx⟩
+        simp only [List.tails, List.mem_cons]
+        exact Or.inr hv
+      · obtain ⟨v, hv, hvx⟩ :=
+          exists_wordValue_of_mem_actionStates (y :: u) (List.mem_toFinset.mp hx)
+        exact ⟨v, hv, hvx⟩
+
 end MarshallHall
