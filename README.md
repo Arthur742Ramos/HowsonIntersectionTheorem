@@ -179,6 +179,6 @@ ruby scripts/validate-formalization.rb
 The Challenge contains one deliberate proof hole. The Solution and the
 implementation library contain no proof holes or custom axioms.
 
-The registered Challenge/Solution surface remains the compact LERF theorem;
-the stronger Hall and rank results are exported by the library root
-`MarshallHall.lean`.
+The current Palomar Challenge/Solution surface selects the arbitrary-factor
+Grushko--Neumann rank theorem. The Hall free-factor and LERF results remain
+proved and exported by the library root `MarshallHall.lean`.

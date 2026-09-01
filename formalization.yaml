@@ -121,11 +121,11 @@ status:
       file: "MarshallHall.lean"
       sorry_count: 0
       axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
     - declaration: "freeGroup_subgroup_separable"
       file: "Solution.lean"
       sorry_count: 0
       axioms: ["propext", "Classical.choice", "Quot.sound"]
-      comparator_config: "comparator.json"
 
 automation:
   methods:
@@ -143,17 +143,13 @@ automation:
 
 fidelity:
   divergences: >-
-    The registered public Challenge remains the compact subgroup-separability
-    statement, while the library additionally proves the stronger Hall
-    free-factor theorem. The formal index condition is `K.index ≠ 0`, matching
-    Mathlib's convention that an infinite-index subgroup has index zero. The
-    finite cover is encoded as a finite permutation action on a set of
-    left-coset states; each partial generator action is completed by an
-    equivalence extension. The finite-indexed free-group rank calculation is
-    restricted to free factors that are themselves free groups on finite
-    types; the binary arbitrary-factor theorem applies to all finitely
-    generated factors and is proved by the finite graph reduction in
-    `MarshallHall/GrushkoFull.lean`.
+    The public Challenge now selects the arbitrary-factor binary
+    Grushko--Neumann equality rather than the previously registered LERF
+    corollary. The Hall free-factor theorem and the finite-indexed free-group
+    rank calculation remain additional proved library results. The finite
+    cover in the Hall construction is encoded as a finite permutation action
+    on a set of left-coset states; the binary arbitrary-factor rank theorem is
+    proved by the finite graph reduction in `MarshallHall/GrushkoFull.lean`.
 
 review:
   status: "self-assessed"
@@ -166,8 +162,8 @@ review:
     suffix-state construction, permutation completion, basepoint stabilizer,
     finite-index argument, subgroup containment, free-factor retraction, rank
     calculations, and arbitrary-factor graph reduction are checked by Lean's
-    kernel; the pinned Comparator replay checks the Challenge/Solution
-    correspondence independently.
+    kernel; the pinned Comparator replay checks the selected Grushko
+    Challenge/Solution correspondence independently.
 
 alignment:
   namespace: ""
@@ -176,7 +172,7 @@ alignment:
       lean: "freeGroup_subgroup_separable"
       module: "Solution.lean"
       status: "proved"
-      note: "For a finitely generated subgroup H, the library constructs a finite-index K containing H with an explicit inclusion-compatible free-factor decomposition; the registered surface exposes the LERF corollary for g outside H."
+      note: "For a finitely generated subgroup H, the library constructs a finite-index K containing H with an explicit inclusion-compatible free-factor decomposition; this remains the LERF consequence of the Hall construction."
     - source: "Marshall Hall, Subgroups of Finite Index in Free Groups"
       lean: "MarshallHall.marshallHall"
       module: "MarshallHall/Hall.lean"
@@ -196,7 +192,7 @@ alignment:
       lean: "MarshallHall.rank_freeProduct_eq_add"
       module: "MarshallHall.lean"
       status: "proved"
-      note: "The arbitrary-factor binary theorem is obtained from a kernel-checked finite labelled-graph reduction, including the source-unfold and monochromatic-vertex contraction cases."
+      note: "This is the new Palomar-selected result: the rank of a free product of arbitrary finitely generated groups is the sum of the factor ranks, obtained by a kernel-checked finite labelled-graph reduction including source-unfold and monochromatic-vertex contraction cases."
     - source: "Stallings finite-core method"
       lean: "MarshallHall.freeGroup_subgroup_separable_proved"
       module: "MarshallHall/Separation.lean"

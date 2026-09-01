@@ -2,7 +2,7 @@
   "challenge_module": "Challenge",
   "solution_module": "Solution",
   "theorem_names": [
-    "freeGroup_subgroup_separable"
+    "rank_freeProduct_eq_add"
   ],
   "definition_names": [],
   "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
