@@ -2,8 +2,7 @@
   "challenge_module": "Challenge",
   "solution_module": "Solution",
   "theorem_names": [
-    "MarshallHall.marshallHall",
-    "rank_freeProduct_eq_add"
+    "HowsonChallenge.howson_intersection_fg"
   ],
   "definition_names": [],
   "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],

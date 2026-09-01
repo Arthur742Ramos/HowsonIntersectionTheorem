@@ -1,6 +1,6 @@
-name = "MarshallHallTheorem"
+name = "HowsonIntersectionTheorem"
 version = "0.1.0"
-defaultTargets = ["MarshallHall", "Challenge", "Solution"]
+defaultTargets = ["Howson", "Challenge", "Solution"]
 
 [[require]]
 name = "mathlib"
@@ -18,3 +18,11 @@ roots = ["Challenge"]
 [[lean_lib]]
 name = "Solution"
 roots = ["Solution"]
+
+[[lean_lib]]
+name = "Howson"
+roots = ["Howson"]
+
+[[lean_lib]]
+name = "GraphCoveringTheory"
+roots = ["GraphCoveringTheory"]

@@ -1,20 +1,15 @@
-import MarshallHall
-
-noncomputable section
-
-open Monoid.Coprod
-
-universe u
+import Howson
 
 /-!
-# Checked Grushko--Neumann solution
+# Checked Howson solution
 
-The public theorem is the arbitrary-factor binary rank-additivity statement.
-Its proof is supplied by the finite labelled-graph reduction in
-`MarshallHall.GrushkoFull`.
+The public theorem is supplied by the explicit finite-core/Hall/Kurosh
+construction in `Howson.Intersection`.
 -/
 
-theorem rank_freeProduct_eq_add {G H : Type u} [Group G] [Group H]
-    [Group.FG G] [Group.FG H] :
-    Group.rank (G ∗ H) = Group.rank G + Group.rank H := by
-  exact MarshallHall.rank_freeProduct_eq_add
+theorem HowsonChallenge.howson_intersection_fg
+    {α : Type*} [Finite α]
+    (H K : Subgroup (FreeGroup α))
+    [Group.FG H] [Group.FG K] :
+    Group.FG (H ⊓ K : Subgroup (FreeGroup α)) := by
+  exact Howson.howson_intersection_fg H K

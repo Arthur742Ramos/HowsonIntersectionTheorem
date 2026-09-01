@@ -3,7 +3,7 @@
  "packages":
  [{"type": "path",
    "scope": "",
-   "name": "MarshallHallTheorem",
+   "name": "HowsonIntersectionTheorem",
    "manifestFile": "lake-manifest.json",
    "inherited": false,
    "dir": "../",

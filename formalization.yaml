@@ -2,19 +2,17 @@
 version: "v0.4"
 
 project:
-  name: "Marshall Hall's theorem through finite cores"
+  name: "Howson's theorem through finite cores and Kurosh decomposition"
   description: >-
-    Formalizes Marshall Hall's finite-index free-factor theorem for finitely
-    generated subgroups of finite-rank free groups. The proof extracts the
-    finitely many suffix states of a subgroup generating set, completes the
-    resulting partial generator actions to permutations of a finite state
-    set, identifies the connected orbit with a finite core, and extends a
-    geodesic spanning tree to obtain an inclusion-compatible free-product
-    decomposition. The repository also proves binary and finite-indexed
-    free-group instances of Grushko--Neumann rank additivity, the
-    arbitrary-factor binary theorem, and the LERF consequence. The
-    arbitrary-factor proof is carried by a finite labelled-graph fold,
-    source-unfold, and monochromatic-vertex contraction reduction.
+    Formalizes Howson's theorem for finite-rank free groups: the intersection
+    of two finitely generated subgroups is finitely generated. The proof uses
+    the repository's inclusion-compatible Marshall Hall construction to place
+    one subgroup as a free factor of a finite-index overgroup, applies
+    Schreier's finite-index theorem to the other subgroup, and then uses the
+    actual Kurosh decomposition of the resulting subgroup of a binary free
+    product. The final map from the relevant conjugate-intersection factor is
+    defined from the factor inclusions and proved surjective onto the internal
+    subgroup intersection.
   authors:
     - "Arthur Freitas Ramos"
     - "David Barros Hulak"
@@ -31,14 +29,14 @@ classification:
   msc2020: ["20E07", "20F65", "05C25"]
 
 sources:
-  - title: "Subgroups of Finite Index in Free Groups"
+  - title: "On the Intersection of Finitely Generated Free Groups"
     authors:
-      - "Marshall Hall, Jr."
-    id: "10.4153/CJM-1949-017-2"
+      - "A. G. Howson"
+    id: "10.1112/jlms/s1-29.4.428"
     type: "article"
-    location: "https://doi.org/10.4153/CJM-1949-017-2"
+    location: "https://doi.org/10.1112/jlms/s1-29.4.428"
     relationship: "formalizes"
-    note: "Classical source for the finite-index extension theorem; the library proves the free-factor conclusion with an explicit inclusion-compatible coproduct witness, together with its LERF consequence."
+    note: "Classical source for the finite-generation intersection theorem; the public theorem formalizes its finite-rank free-group statement."
     license: "unknown"
     author_endorsement: "not-contacted"
   - title: "Topology of finite graphs"
@@ -46,87 +44,55 @@ sources:
       - "John R. Stallings"
     id: "10.1007/BF02095993"
     type: "article"
-    location: "Inventiones Mathematicae 71(3), 551--565 (1983)"
+    location: "https://doi.org/10.1007/BF02095993"
     relationship: "background"
-    note: "Original finite-graph and core-graph source for the covering perspective behind the finite-state completion used by the implementation."
+    note: "Provides the finite-core and covering-graph perspective behind the subgroup technology used by the Hall and Kurosh layers."
     license: "unknown"
     author_endorsement: "not-contacted"
-  - title: "Stallings foldings and subgroups of free groups"
+  - title: "Subgroups of finite index in free groups"
     authors:
-      - "Ilya Kapovich"
-      - "Alexei Myasnikov"
-    id: "10.1006/jabr.2001.9033"
+      - "Marshall Hall, Jr."
+    id: "10.4153/CJM-1949-017-2"
     type: "article"
-    location: "Journal of Algebra 248(2), 608--668 (2002)"
+    location: "https://doi.org/10.4153/CJM-1949-017-2"
     relationship: "background"
-    note: "Combinatorial and computational treatment of Stallings foldings; it motivates the finite-core viewpoint, while this repository proves the stated separator by finite permutation completion."
-    license: "unknown"
-    author_endorsement: "not-contacted"
-  - title: "On the Number of Generators of a Free Product"
-    authors:
-      - "B. H. Neumann"
-    id: "10.1112/jlms/s1-18.1.12"
-    type: "article"
-    location: "Journal of the London Mathematical Society 18(1), 12--20 (1943)"
-    relationship: "formalizes"
-    note: "Classical source for the Grushko--Neumann rank-additivity theorem; this repository formalizes the finite-rank free-group cases and the arbitrary-factor binary theorem by a certified finite labelled-graph reduction."
+    note: "Classical finite-index free-group theorem used as the mathematical predecessor for the explicit Hall free-factor construction in the implementation."
     license: "unknown"
     author_endorsement: "not-contacted"
 
 related_formalizations:
+  - id: "https://github.com/Arthur742Ramos/MarshallHallTheorem"
+    relationship: "builds-on"
+    note: "Preceding Lean development supplying the inclusion-compatible Marshall Hall witness, finite-core completion, Schreier basis, and the finite-index subgroup step used here."
+  - id: "https://github.com/Arthur742Ramos/GraphCoveringTheory"
+    relationship: "builds-on"
+    note: "Preceding Lean development supplying the Bass--Serre/Kurosh decomposition and the exact conjugate-intersection factor API used here."
   - id: "https://github.com/leanprover-community/mathlib4/blob/v4.32.0/Mathlib/GroupTheory/FreeGroup/NielsenSchreier.lean"
     relationship: "builds-on"
-    note: "Uses Mathlib's free-group representation and Nielsen--Schreier infrastructure; the finite-core separation construction is developed in this repository."
-  - id: "https://github.com/leanprover-community/mathlib4/blob/v4.32.0/Mathlib/GroupTheory/FreeGroup/Reduce.lean"
+    note: "Uses Mathlib's free-group and Nielsen--Schreier interfaces for the finite-rank ambient groups."
+  - id: "https://github.com/leanprover-community/mathlib4/blob/v4.32.0/Mathlib/GroupTheory/Schreier.lean"
     relationship: "builds-on"
-    note: "Uses the canonical reduced-word encoding and normalization lemmas to enumerate suffix states of finite words."
-  - id: "https://github.com/leanprover-community/mathlib4/blob/v4.32.0/Mathlib/GroupTheory/Coset/Basic.lean"
-    relationship: "builds-on"
-    note: "Uses the left-coset quotient and its exact relation to subgroup membership."
-  - id: "https://github.com/leanprover-community/mathlib4/blob/v4.32.0/Mathlib/Logic/Equiv/Fintype.lean"
-    relationship: "builds-on"
-    note: "Uses `Equiv.extendSubtype` to complete each finite partial generator action to a permutation."
-  - id: "https://github.com/Arthur742Ramos/GraphCoveringTheory"
-    relationship: "other"
-    note: "The preceding covering-graph and Schreier development motivated the finite-state covering formulation, but is not imported by this repository."
+    note: "Uses Mathlib's kernel-checked finite-index Schreier generation instance for the pullback subgroup."
 
 status:
   scope: >-
-    The main Hall theorem covers every finite generating type alpha and every
-    finitely generated subgroup H of FreeGroup alpha. It produces a subgroup
-    K containing H with nonzero natural-number index, a complement, and a
-    multiplicative equivalence H * complement ≃* K whose left injection is the
-    actual inclusion of H. The same finite-state engine yields the LERF
-    separator for any element outside H. The rank result covers binary and
-    finite indexed free products of free groups on finite types, and the
-    arbitrary-factor binary rank theorem is proved for all finitely generated
-    groups by strong induction on the finite labelled graph.
+    The main result covers every finite type alpha and every pair of finitely
+    generated subgroups H and K of FreeGroup alpha. It proves
+    Group.FG (H ⊓ K). The implementation explicitly passes through a
+    finite-index Hall overgroup, the binary free-product bridge, a finitely
+    generated Kurosh factor, and a homomorphism induced by the actual factor
+    inclusion whose image is exactly H ⊓ K. The repository retains the
+    preceding Hall and Kurosh infrastructure as supporting formalization;
+    those earlier named results are not presented as new sources here.
   sorry_count: 0
   sorry_in_definitions: 0
   axioms: ["propext", "Classical.choice", "Quot.sound"]
   main_results:
-    - declaration: "MarshallHall.marshallHall"
-      file: "MarshallHall/Hall.lean"
-      sorry_count: 0
-      axioms: ["propext", "Classical.choice", "Quot.sound"]
-      comparator_config: "comparator.json"
-    - declaration: "MarshallHall.rank_binaryFreeProduct"
-      file: "MarshallHall/Grushko.lean"
-      sorry_count: 0
-      axioms: ["propext", "Classical.choice", "Quot.sound"]
-    - declaration: "MarshallHall.GeneralGrushko.rank_coprodI_freeGroup"
-      file: "MarshallHall/GrushkoGeneral.lean"
-      sorry_count: 0
-      axioms: ["propext", "Classical.choice", "Quot.sound"]
-    - declaration: "MarshallHall.rank_freeProduct_eq_add"
-      file: "MarshallHall.lean"
-      sorry_count: 0
-      axioms: ["propext", "Classical.choice", "Quot.sound"]
-      comparator_config: "comparator.json"
-    - declaration: "freeGroup_subgroup_separable"
+    - declaration: "HowsonChallenge.howson_intersection_fg"
       file: "Solution.lean"
       sorry_count: 0
       axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
 
 automation:
   methods:
@@ -140,18 +106,17 @@ automation:
         hardware: "local machine"
       prompting_notes: "The theorem was developed against the pinned Lean and Mathlib APIs and checked by the Lean kernel."
   spend_usd: "subscription-based"
-  notes: "The public statement is isolated from the finite-core implementation module."
+  notes: "The public statement is isolated from the finite-core, Hall, and Kurosh implementation modules."
 
 fidelity:
   divergences: >-
-    The public Challenge now selects both the strengthened inclusion-compatible
-    Hall free-factor theorem and the arbitrary-factor binary Grushko--Neumann
-    equality rather than the previously registered LERF corollary. The
-    finite-indexed free-group rank calculation and the LERF separator remain
-    additional proved library results. The finite cover in the Hall
-    construction is encoded as a finite permutation action on a set of
-    left-coset states; the binary arbitrary-factor rank theorem is proved by
-    the finite graph reduction in `MarshallHall/GrushkoFull.lean`.
+    The classical Howson property is often stated for an arbitrary free group.
+    This submission formalizes the finite-rank form, which is the exact scope
+    of the present finite-type development. It proves finite generation of the
+    intersection and does not claim Howson's sharper rank bound. The proof's
+    Kurosh step is not an abstract isomorphism: the selected factor is the
+    actual intersection with a conjugate of the Hall factor, and the final
+    homomorphism is defined from the corresponding subgroup inclusion.
 
 review:
   status: "self-assessed"
@@ -159,51 +124,35 @@ review:
     - "none"
   notes: >-
     The Challenge theorem is a small statement surface with one deliberate
-    proof hole excluded from the status counts. The Solution and implementation
-    library contain no proof holes or nonstandard axioms. The finite
-    suffix-state construction, permutation completion, basepoint stabilizer,
-    finite-index argument, subgroup containment, free-factor retraction, rank
-    calculations, and arbitrary-factor graph reduction are checked by Lean's
-    kernel; the pinned Comparator replay checks both selected
-    Challenge/Solution correspondences independently.
+    proof hole excluded from the status counts. Solution.lean and the
+    implementation library contain no proof holes or custom axioms. The
+    kernel checks the Hall free-factor witness, finite-index Schreier step,
+    binary free-product equivalence, Kurosh factor finite generation, and the
+    explicit surjection onto H ⊓ K; the pinned Comparator replay checks the
+    Challenge/Solution correspondence independently.
 
 alignment:
-  namespace: ""
+  namespace: "HowsonChallenge"
   statements:
-    - source: "Marshall Hall, Subgroups of Finite Index in Free Groups"
-      lean: "freeGroup_subgroup_separable"
+    - source: "A. G. Howson, On the Intersection of Finitely Generated Free Groups"
+      lean: "HowsonChallenge.howson_intersection_fg"
       module: "Solution.lean"
       status: "proved"
-      note: "For a finitely generated subgroup H, the library constructs a finite-index K containing H with an explicit inclusion-compatible free-factor decomposition; this remains the LERF consequence of the Hall construction."
-    - source: "Marshall Hall, Subgroups of Finite Index in Free Groups"
+      note: "The public theorem states that the intersection of two finitely generated subgroups of a finite-rank free group is finitely generated."
+    - source: "Howson implementation theorem"
+      lean: "Howson.howson_intersection_fg"
+      module: "Howson/Intersection.lean"
+      status: "proved"
+      note: "The proof uses the inclusion-compatible Hall witness, finite-index Schreier generation, and an inclusion-induced surjection from an exact Kurosh conjugate-intersection factor."
+    - source: "Marshall Hall finite-index free-factor theorem"
       lean: "MarshallHall.marshallHall"
       module: "MarshallHall/Hall.lean"
-      status: "proved"
-      note: "One of the two new Palomar-selected results: the witness records K, H ≤ K, nonzero index, a complement, and the actual subgroup inclusion under the coproduct equivalence."
-    - source: "B. H. Neumann, On the Number of Generators of a Free Product"
-      lean: "MarshallHall.rank_binaryFreeProduct"
-      module: "MarshallHall/Grushko.lean"
-      status: "proved"
-      note: "Binary rank additivity is formalized for free groups on finite types; the lower bound is certified through free abelianization."
-    - source: "B. H. Neumann, On the Number of Generators of a Free Product"
-      lean: "MarshallHall.GeneralGrushko.rank_coprodI_freeGroup"
-      module: "MarshallHall/GrushkoGeneral.lean"
-      status: "proved"
-      note: "The finite indexed free-group case is transported through the canonical indexed free-product equivalence."
-    - source: "B. H. Neumann, On the Number of Generators of a Free Product"
-      lean: "MarshallHall.rank_freeProduct_eq_add"
-      module: "MarshallHall.lean"
-      status: "proved"
-      note: "The second new Palomar-selected result: the rank of a free product of arbitrary finitely generated groups is the sum of the factor ranks, obtained by a kernel-checked finite labelled-graph reduction including source-unfold and monochromatic-vertex contraction cases."
-    - source: "Stallings finite-core method"
-      lean: "MarshallHall.freeGroup_subgroup_separable_proved"
-      module: "MarshallHall/Separation.lean"
-      status: "proved"
-      note: "The implementation enumerates suffix states, completes partial label actions, and uses the resulting basepoint stabilizer."
-    - source: "Mathlib GroupTheory FreeGroup Reduce"
-      lean: "MarshallHall.wordValue_eq_freeGroup_mk"
-      module: "MarshallHall/FiniteCore.lean"
-      status: "proved"
-      note: "The finite-core word evaluator agrees with Mathlib's reduced free-group word representation."
+      status: "supporting"
+      note: "Supporting preceding formalization: places H inside a finite-index subgroup as an actual free factor, with the left coproduct injection identified with subgroup inclusion."
+    - source: "Kurosh subgroup theorem"
+      lean: "GraphCoveringTheory.Kurosh.kurosh_decomposition"
+      module: "GraphCoveringTheory/KuroshTheorem.lean"
+      status: "supporting"
+      note: "Supporting preceding formalization: decomposes a subgroup of a free product into its Bass--Serre factors and free part; the Howson proof selects the factor attached to H."
 
-acknowledgements: "Mathlib contributors for the free-group, quotient, finite-type, permutation, and group-action infrastructure; John R. Stallings, Ilya Kapovich, and Alexei Myasnikov for the finite-core and folding perspectives; Marshall Hall, Jr. for the classical theorem; and the Palomar Registry project for the statement/solution Comparator workflow."
+acknowledgements: "Mathlib contributors for the free-group, finite-index, subgroup, quotient, and free-product infrastructure; A. G. Howson, John R. Stallings, and Marshall Hall, Jr. for the mathematical sources; the preceding MarshallHallTheorem and GraphCoveringTheory formalizations; and the Palomar Registry project for the statement/solution Comparator workflow."
