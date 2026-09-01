@@ -17,6 +17,8 @@ project:
     source-unfold, and monochromatic-vertex contraction reduction.
   authors:
     - "Arthur Freitas Ramos"
+    - "David Barros Hulak"
+    - "Ruy J. G. B. de Queiroz"
   license: "Apache-2.0"
   responsible_maintainers:
     - "Arthur Freitas Ramos"
